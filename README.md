@@ -9,7 +9,7 @@ Attach ISO to > Provider Host Machine
 k3s / microk8s / kubespray
 
 You will be prompted to choose an install path during the first boot.
-The default install path is microk8s.
+The default install path is k3s.
 
 # What is this image best used for?
 
