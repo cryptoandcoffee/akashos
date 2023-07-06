@@ -76,7 +76,7 @@ helm upgrade --install akash-node akash/akash-node -n akash-services --set image
   --set state_sync.enabled=false \
   --set akash_node.snapshot_provider=polkachu \
   --set resources.limits.cpu="4" \
-  --set resources.limits.memory="8G#i" \
+  --set resources.limits.memory="8Gi" \
   --set resources.requests.cpu="2" \
   --set resources.requests.memory="4Gi"
 
