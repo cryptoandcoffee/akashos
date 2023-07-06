@@ -70,7 +70,7 @@ kubectl label ingressclass akash-ingress-class akash.network=true
 ingress_charts
 
 # Node
-helm upgrade --install akash-node akash/akash-node -n akash-services --set image.tag="0.23.0-rc26" \
+helm upgrade --install akash-node akash/akash-node -n akash-services --set image.tag="0.23.1-rc0" \
   --set akash_node.api_enable=true \
   --set akash_node.minimum_gas_prices=0uakt \
   --set state_sync.enabled=false \
