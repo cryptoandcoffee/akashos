@@ -73,6 +73,8 @@ ingress_charts
 helm upgrade --install akash-node akash/akash-node -n akash-services --set image.tag="0.23.1-rc0" \
   --set akash_node.moniker="AkashOS" \
   --set akash_node.chainid=$CHAIN_ID \
+  --set akash_node.net="https://raw.githubusercontent.com/akash-network/net/master/testnet-02" \
+  --set akash_node.peers="1030dd1fdc6dc8686b00e069f00866376d5e95cf@p2p.testnet-02.aksh.pw:26656" \
   --set akash_node.api_enable=true \
   --set akash_node.minimum_gas_prices=0uakt \
   --set state_sync.enabled=false \
