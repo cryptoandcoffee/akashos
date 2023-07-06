@@ -5,14 +5,14 @@ export KUBECONFIG=/home/akash/.kube/kubeconfig
 DOMAIN="$DOMAIN"
 ACCOUNT_ADDRESS="$ACCOUNT_ADDRESS"
 KEY_SECRET="$KEY_SECRET"
-CHAIN_ID=testnet-02
+CHAIN_ID="testnet-02"
 REGION="$REGION"
 CHIA_PLOTTING=false
 CPU="$CPU"
 HOST="akash"
 TIER="community"
-#NODE="http://rpc.testnet-02.aksh.pw:26657"
 NODE="http://akash-node-1:26657"
+#NODE="http://rpc.testnet-02.aksh.pw:26657"
 #####################################################
 
 # Akash Helm Charts
@@ -71,6 +71,8 @@ ingress_charts
 
 # Node
 helm upgrade --install akash-node akash/akash-node -n akash-services --set image.tag="0.23.1-rc0" \
+  --set akash_node.moniker="AkashOS" \
+  --set akash_node.chainid=$CHAIN_ID \
   --set akash_node.api_enable=true \
   --set akash_node.minimum_gas_prices=0uakt \
   --set state_sync.enabled=false \
@@ -92,6 +94,7 @@ helm upgrade --install akash-provider akash/provider -n akash-services --set ima
              --set attributes[7].key=status --set attributes[7].value=https://status.$DOMAIN \
              --set attributes[8].key=capabilities/gpu/vendor/nvidia/model/3080ti --set attributes[8].value=true \
              --set attributes[9].key=capabilities/gpu/vendor/nvidia/model/1080 --set attributes[9].value=true \
+             --set chainid=$CHAIN_ID \
              --set from=$ACCOUNT_ADDRESS \
              --set key="$(cat /home/akash/key.pem | base64)" \
              --set keysecret="$(echo $KEY_SECRET | base64)" \
