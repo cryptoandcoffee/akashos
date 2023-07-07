@@ -10,22 +10,9 @@ set -o pipefail
 # # Alice: akash1fxa9ss3dg6nqyz8aluyaa6svypgprk5tw9fa4q
 # # Bob: akash1fhe3uk7d95vvr69pna7cxmwa8777as46uyxcz8
 # if [[ "$AKASH_OWNER" == @(akash1fxa9ss3dg6nqyz8aluyaa6svypgprk5tw9fa4q|akash1fhe3uk7d95vvr69pna7cxmwa8777as46uyxcz8) ]]; then
-#   echo 1
+#   echo 0.1
 #   exit 0
 # fi
-
-# Do not bid if the tenant address is not in the list passed with WHITELIST_URL environment variable
-if ! [[ -z $WHITELIST_URL ]]; then
-  WHITELIST=/tmp/price-script.whitelist
-  if ! test $(find $WHITELIST -mmin -10 2>/dev/null); then
-    curl -o $WHITELIST -s --connect-timeout 3 --max-time 3 -- $WHITELIST_URL
-  fi
-
-  if ! grep -qw "$AKASH_OWNER" $WHITELIST; then
-    echo "$AKASH_OWNER is not whitelisted" >&2
-    exit 1
-  fi
-fi
 
 data_in=$(jq .)
 
