@@ -84,30 +84,65 @@ helm upgrade --install akash-node akash/akash-node -n akash-services --set image
   --set resources.requests.cpu="2" \
   --set resources.requests.memory="4Gi"
 
-# Provider
-helm upgrade --install akash-provider akash/provider -n akash-services --set image.tag="0.3.1-rc1" \
-             --set attributes[0].key=region --set attributes[0].value=$REGION \
-             --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
-             --set attributes[2].key=host --set attributes[2].value=$HOST \
-             --set attributes[3].key=cpu --set attributes[3].value=$CPU \
-             --set attributes[4].key=tier --set attributes[4].value=$TIER \
-             --set attributes[5].key=network_download --set attributes[5].value=$DOWNLOAD \
-             --set attributes[6].key=network_upload --set attributes[6].value=$UPLOAD \
-             --set attributes[7].key=status --set attributes[7].value=https://status.$DOMAIN \
-             --set attributes[8].key=capabilities/gpu/vendor/nvidia/model/3080ti --set attributes[8].value=true \
-             --set attributes[9].key=capabilities/gpu/vendor/nvidia/model/1080 --set attributes[9].value=true \
-             --set chainid=$CHAIN_ID \
-             --set from=$ACCOUNT_ADDRESS \
-             --set key="$(cat /home/akash/key.pem | base64)" \
-             --set keysecret="$(echo $KEY_SECRET | base64)" \
-             --set domain=$DOMAIN \
-             --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
-             --set node=$NODE \
-             --set log_restart_patterns="rpc node is not catching up" \
-             --set resources.limits.cpu="2" \
-             --set resources.limits.memory="2Gi" \
-             --set resources.requests.cpu="1" \
-             --set resources.requests.memory="1Gi"
+# Node
+helm upgrade --install akash-node akash/akash-node -n akash-services --set image.tag="0.23.1-rc0" \
+  --set akash_node.moniker="AkashOS" \
+  --set akash_node.chainid=$CHAIN_ID \
+  --set akash_node.net="https://raw.githubusercontent.com/akash-network/net/master/testnet-02" \
+  --set akash_node.peers="1030dd1fdc6dc8686b00e069f00866376d5e95cf@p2p.testnet-02.aksh.pw:26656" \
+  --set akash_node.api_enable=true \
+  --set akash_node.minimum_gas_prices=0uakt \
+  --set state_sync.enabled=false \
+  --set akash_node.snapshot_provider=polkachu \
+  --set resources.limits.cpu="4" \
+  --set resources.limits.memory="8Gi" \
+  --set resources.requests.cpu="2" \
+  --set resources.requests.memory="4Gi"
+
+
+# Run nvidia-smi command to get GPU information
+gpu_info="$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)"
+gpu_models=$(echo "$gpu_info" | awk 'BEGIN {FS = ", "} ; {print $1}' | awk '{print $6 substr($4, 1) tolower(substr($5, 1))}')
+# Label nodes with specific GPU models using kubectl
+node_name="akash-node1"
+label_prefix="akash.network/capabilities.gpu.vendor.nvidia.model."
+
+for model in $gpu_models; do
+        label_command="kubectl label node $node_name $label_prefix$model=true"
+        echo $label_command
+        eval $label_command
+done
+
+helm_command="helm upgrade --install akash-provider akash/provider -n akash-services \
+--set image.tag=\"0.3.1-rc1\" \
+--set attributes[0].key=region --set attributes[0].value=\"$REGION\" \
+--set attributes[1].key=chia-plotting --set attributes[1].value=\"$CHIA_PLOTTING\" \
+--set attributes[2].key=host --set attributes[2].value=\"$HOST\" \
+--set attributes[3].key=cpu --set attributes[3].value=\"$CPU\" \
+--set attributes[4].key=tier --set attributes[4].value=\"$TIER\" \
+--set attributes[5].key=network_download --set attributes[5].value=\"$DOWNLOAD\" \
+--set attributes[6].key=network_upload --set attributes[6].value=\"$UPLOAD\" \
+--set attributes[7].key=status --set attributes[7].value=\"https://status.$DOMAIN\""
+
+# Add GPU model attributes to the helm command
+gpu_index=8
+for model in $gpu_models; do
+    attr_key="$label_prefix$model"
+    attr_value="true"
+    helm_command+=" --set attributes[$gpu_index].key=$attr_key --set attributes[$gpu_index].value=$attr_value"
+    gpu_index=$((gpu_index + 1))
+done
+
+helm_command+=" --set chainid=\"$CHAIN_ID\" \
+--set from=\"$ACCOUNT_ADDRESS\" \
+--set key=\"$(cat /home/akash/key.pem | base64 | tr -d '\n')\" \
+--set keysecret=\"$(echo -n "$KEY_SECRET" | base64 | tr -d '\n')\" \
+--set domain=\"$DOMAIN\" \
+--set bidpricescript=\"$(cat /home/akash/bid-engine-script.sh | openssl base64 -A | tr -d '\n')\" \
+--set node=\"$NODE\" \
+--set log_restart_patterns=\"rpc node is not catching up\""
+
+eval "$helm_command"
 
 # Provider customizations
 kubectl set env statefulset/akash-provider AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=1h -n akash-services
