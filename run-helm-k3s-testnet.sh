@@ -92,8 +92,7 @@ label_prefix="akash.network/capabilities.gpu.vendor.nvidia.model."
 
 for model in $gpu_models; do
         label_command="kubectl label node $node_name $label_prefix$model=true"
-        echo $label_command
-        eval $label_command
+        $label_command
 done
 
 helm_command="helm upgrade --install akash-provider akash/provider -n akash-services \
