@@ -86,9 +86,9 @@ set +e
 #Price in USD/month
 # Hetzner: CPX51 with 16CPU, 32RAM, 360GB disk = $65.81
 # Akash: `(1.60*16)+(0.80*32)+(0.04*360)` = $65.60
-TARGET_CPU="1.60"          # USD/thread-month
-TARGET_MEMORY="0.80"       # USD/GB-month
-TARGET_HD_EPHEMERAL="0.02" # USD/GB-month
+TARGET_CPU="5.00"          # USD/thread-month
+TARGET_MEMORY="0.75"       # USD/GB-month
+TARGET_HD_EPHEMERAL="0.35" # USD/GB-month
 TARGET_HD_PERS_HDD="0.01"  # USD/GB-month (beta1)
 TARGET_HD_PERS_SSD="0.03"  # USD/GB-month (beta2)
 TARGET_HD_PERS_NVME="0.04" # USD/GB-month (beta3)
@@ -116,4 +116,13 @@ total_cost_akt_target=$(bc -l <<<"(${total_cost_usd_target}/$usd_per_akt)")
 total_cost_uakt_target=$(bc -l <<<"(${total_cost_akt_target}*1000000)")
 cost_per_block=$(bc -l <<<"(${total_cost_uakt_target}/429909)")
 total_cost_uakt=$(echo "$cost_per_block" | jq 'def ceil: if . | floor == . then . else . + 1.0 | floor end; .|ceil')
-echo $total_cost_uakt
+
+# Only bid on GPU SDL
+if (( $(bc <<< "$gpu_units_requested < 1") )); then
+  echo "Skipping bid. gpu_units_requested < 1" >&2
+  exit 1
+else
+  echo $total_cost_uakt
+fi
+
+
