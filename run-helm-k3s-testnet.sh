@@ -103,7 +103,7 @@ helm upgrade --install akash-provider akash/provider -n akash-services --set ima
              --set domain=$DOMAIN \
              --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
              --set node=$NODE \
-             --set log_restart_patterns="rpc node is not catching up|bid failed" \
+             --set log_restart_patterns="rpc node is not catching up" \
              --set resources.limits.cpu="2" \
              --set resources.limits.memory="2Gi" \
              --set resources.requests.cpu="1" \
@@ -117,5 +117,3 @@ helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n 
 
 # Inventory Operator
 helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services --set image.tag="0.3.1-rc1"
-
-
