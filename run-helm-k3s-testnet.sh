@@ -59,7 +59,7 @@ EOF
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+helm upgrade --wait --install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace \
   -f ingress-nginx-custom.yaml
  
