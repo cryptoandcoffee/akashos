@@ -11,8 +11,8 @@ CHIA_PLOTTING=false
 CPU="$CPU"
 HOST="akash"
 TIER="community"
-NODE="http://akash-node-1:26657"
-#NODE="http://rpc.testnet-02.aksh.pw:26657"
+#NODE="http://akash-node-1:26657"
+NODE="http://rpc.testnet-02.aksh.pw:26657"
 #####################################################
 
 # Akash Helm Charts
