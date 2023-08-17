@@ -135,7 +135,7 @@ run_bootstrap() {
             ;;
     esac
 
-    wget -q --no-cache "https://raw.githubusercontent.com/88plug/akash-provider-tools/main/$bootstrap_script"
+    wget -q --no-cache "https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/$bootstrap_script"
     chmod +x "$bootstrap_script"
     echo "No setup detected! Enter the default password 'akash' to start the Akash installer"
     sudo "./$bootstrap_script"
