@@ -183,7 +183,7 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
   # Dynamic or Static Public IP?
   while true; do
     clear
-    read -p "Do you have a dynamic or static IP address? ($ip_) (dynamic/static): " choice
+    read -p "Do you have a dynamic DNS address or a static IP address? ($ip_) (dynamic/static): " choice
     
     case "$choice" in
         dynamic|DYNAMIC ) 
