@@ -258,8 +258,8 @@ kubectl get nodes -o wide
 
 
 echo "Get latest config from github"
-wget -q https://raw.githubusercontent.com/88plug/akash-provider-tools/main/run-helm-microk8s.sh
-wget -q https://raw.githubusercontent.com/88plug/akash-provider-tools/main/bid-engine-script.sh
+wget -q https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/run-helm-microk8s.sh
+wget -q https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/bid-engine-script.sh
 chmod +x run-helm-microk8s.sh ; chmod +x bid-engine-script.sh
 chown akash:akash *.sh
 
