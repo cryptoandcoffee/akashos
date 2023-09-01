@@ -98,7 +98,7 @@ while true; do
 done
 
   
-  ./run-helm-k3s-gpu.sh
+  ./run-helm-k3s.sh
   configure_gpu
   create_test_pod
 fi
