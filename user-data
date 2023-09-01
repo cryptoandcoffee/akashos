@@ -38,7 +38,7 @@ autoinstall:
     - lvm2
     - python3-pip
     - gunicorn
-  late-commands: 
+  late-commands:
     - |
       # Runs after the user logs in
       cat <<EOF | tee /target/etc/profile.d/akash.sh
@@ -65,7 +65,7 @@ autoinstall:
       chmod +x ./start-akash.sh ; ./start-akash.sh
       EOF
     - |
-      cat <<EOF | tee /target/etc/issue      
+      cat <<EOF | tee /target/etc/issue
 
       ---------------------------------------------------------------------------------------|
       |
@@ -78,19 +78,19 @@ autoinstall:
       |  News:            : k3s support is in development.
       |
       |--------------------------------------------------------------------------------------|
-      | Web Dashboard : Open http://\4:8080 to finish the configuration.     
+      | Web Dashboard : Open http://\4:8080 to finish the configuration.
       |                                                                                      |
-      | Terminal      : We recommend you login to akash@\4                           
-      |               : with a terminal that supports copy and paste.                        
+      | Terminal      : We recommend you login to akash@\4
+      |               : with a terminal that supports copy and paste.
       |--------------------------------------------------------------------------------------|
 
       EOF
     - |
       cat <<EOF | tee /target/etc/systemd/system/gunicorn.service
       [Unit]
-      Description=Gunicorn instance to serve AkashOS Dashboard   
+      Description=Gunicorn instance to serve AkashOS Dashboard
       After=network.target
-      
+
       [Service]
       User=akash
       Group=akash
@@ -99,7 +99,7 @@ autoinstall:
       ExecStart=gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 0 --worker-class gevent app:app
       Restart=always
       PrivateTmp=true
-      
+
       [Install]
       WantedBy=multi-user.target
       EOF
@@ -120,37 +120,24 @@ autoinstall:
     - curtin in-target -- sed -i '/keys-to-console/d' /etc/cloud/cloud.cfg
     - curtin in-target -- sed -i '/final-message/d' /etc/cloud/cloud.cfg
     - curtin in-target -- apt-get autoremove --purge -y && apt-get autoclean -y && apt-get clean -y
-  user-data:
-    runcmd:
-      - |
-        chown akash:akash /etc/systemd/system/gunicorn.service
-        chmod 664 /etc/systemd/system/gunicorn.service
-        chown akash:akash /etc/profile.d/akash.sh
-        chmod 664 /etc/profile.d/akash.sh
-        chmod +x /etc/profile.d/akash.sh
-        echo "akash ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
-        sudo -u akash touch /home/akash/.hushlogin
-        sudo -u akash git clone https://github.com/cryptoandcoffee/akashos-dashboard/ /home/akash/dashboard >/dev/null 2>&1
-        sudo -u akash pip install --user -r /home/akash/dashboard/requirements.txt >/dev/null 2>&1
-        systemctl enable --now gunicorn >/dev/null 2>&1
-      - |
-        mkdir -p /home/akash/.ssh
-        KEY_LOCATION="/home/akash/.ssh/id_rsa"
-        PASSPHRASE=""
-        HOSTNAME="akash-node-1"
-        ssh-keygen -t rsa -C "$HOSTNAME" -f "$KEY_LOCATION" -P "$PASSPHRASE" >/dev/null 2>&1
-        # Last command to run after first boot and important!
-        chown -R akash:akash /home/akash/
-#    bootcmd: 
-#      - |
-#        rm -rf /home/akash/dashboard
-#        git clone https://github.com/cryptoandcoffee/akashos-dashboard/ /home/akash/dashboard
-#        chown akash:akash -R /home/akash/dashboard
-#      - |
-#        URL="https://raw.githubusercontent.com/88plug/akash-provider-tools/main/start-akash.sh"
-#        FILENAME="start-akash.sh"
-#        wget -q --no-cache -O $FILENAME $URL
-#        echo "akash ALL=(ALL:ALL) NOPASSWD: /bin/systemctl start gunicorn.service, /bin/systemctl stop gunicorn.service, /bin/systemctl restart gunicorn.service, /bin/systemctl reload gunicorn.service, /bin/systemctl daemon-reload, /bin/chown" >> /etc/sudoers.d/akash
-#        chmod 0440 /etc/sudoers.d/akash
-#        chown root:root /etc/sudoers.d/akash
+  runcmd:
+    - |
+      chown akash:akash /etc/systemd/system/gunicorn.service
+      chmod 664 /etc/systemd/system/gunicorn.service
+      chown akash:akash /etc/profile.d/akash.sh
+      chmod 664 /etc/profile.d/akash.sh
+      chmod +x /etc/profile.d/akash.sh
+      echo "akash ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
+      sudo -u akash touch /home/akash/.hushlogin
+      sudo -u akash git clone https://github.com/cryptoandcoffee/akashos-dashboard/ /home/akash/dashboard >/dev/null 2>&1
+      sudo -u akash pip install --user -r /home/akash/dashboard/requirements.txt >/dev/null 2>&1
+      systemctl enable --now gunicorn >/dev/null 2>&1
+    - |
+      mkdir -p /home/akash/.ssh
+      KEY_LOCATION="/home/akash/.ssh/id_rsa"
+      PASSPHRASE=""
+      HOSTNAME="akash-node-1"
+      ssh-keygen -t rsa -C "$HOSTNAME" -f "$KEY_LOCATION" -P "$PASSPHRASE" >/dev/null 2>&1
+      # Last command to run after first boot and important!
+      chown -R akash:akash /home/akash/
 
