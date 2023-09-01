@@ -3,237 +3,76 @@
 mkdir -p  /home/akash/logs/installer
 echo "Install logs are available in /home/akash/logs/installer if anything breaks"
 
-function user_input(){
-
-while true; do
-    clear
-    read -p "Is this setup for a client node? (y/n, default: n): " choice
-
-    case "$choice" in
-        y|Y ) 
-            CLIENT_NODE_=true
-            echo "Client node setup selected."
-            sleep 2
-            break
-            ;;
-        n|N ) 
-            CLIENT_NODE_=false
-            echo "Initial setup for akash-node1 selected."
-            sleep 2
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for client node or 'n' for initial setup."
-            sleep 2
-            ;;
-    esac
-done
-
-if [[ $CLIENT_NODE_ == true ]]; then
-    while true; do
-        clear
-        read -p "Enter the hostname to use for this additional node (default: akash-node2): " CLIENT_HOSTNAME_
-        
-        if [[ -z $CLIENT_HOSTNAME_ ]]; then
-            CLIENT_HOSTNAME_="akash-node2"
-        fi
-        
-        read -p "Are you sure the hostname is correct? ($CLIENT_HOSTNAME_) (y/n): " choice
-        
-        case "$choice" in
-            y|Y ) 
-                break
-                ;;
-            n|N ) 
-                echo "Please try again."
-                sleep 2
-                ;;
-            * ) 
-                echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-                sleep 2
-                ;;
-        esac
-    done
-fi
-
-if [[ $CLIENT_NODE_ == true ]]; then
-    while true; do
-        clear
-        read -p "What is the IP address of akash-node1? : " AKASH_NODE_1_IP_
-        
-        read -p "Are you sure the IP address of akash-node1 is correct? ($AKASH_NODE_1_IP_) (y/n): " choice
-        
-        case "$choice" in
-            y|Y ) 
-                break
-                ;;
-            n|N ) 
-                echo "Please try again."
-                sleep 2
-                ;;
-            * ) 
-                echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-                sleep 2
-                ;;
-        esac
-    done
-fi
-
-if [[ $CLIENT_NODE_ == "false" ]]; then
-  # Check if the user has an Akash wallet
+# Function to handle "read and confirm" type inputs
+confirm_input() {
+  prompt=$1
+  var=$2
+  default=$3
+  validation=$4
   while true; do
     clear
-    read -p "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (y/n) " choice
+    read -p "$prompt" input
+    input="${input:-$default}"
+    
+    # Custom validation logic
+    if [[ -n "$validation" && $(eval $validation) == "false" ]]; then
+      echo "Validation failed. Please try again."
+      sleep 2
+      continue
+    fi
 
+    read -p "Are you sure? ($input) (y/n): " choice
     case "$choice" in
-        y|Y ) 
-            NEW_WALLET_=false
-            break
-            ;;
-        n|N ) 
-            echo "New wallet required during setup."
-            NEW_WALLET_=true
-            sleep 2
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-            sleep 2
-            ;;
+      y|Y ) eval "$var='$input'"; break ;;
+      n|N ) echo "Please try again."; sleep 2 ;;
+      * ) echo "Invalid entry. Please enter 'y' for yes or 'n' for no."; sleep 2 ;;
     esac
   done
+}
 
-  # Import key if the user knows it
-  if [[ $NEW_WALLET_ == "false" ]]; then
-    while true; do
-      clear
-      read -p "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...): " mnemonic_
+# Validation function for mnemonic
+validate_mnemonic() {
+  word_count=$(echo $input | wc -w)
+  [[ $word_count -ge 12 ]] && echo "true" || echo "false"
+}
 
-      read -p "Are you sure the wallet mnemonic is correct? ($mnemonic_) (y/n): " choice
-        
-      case "$choice" in
-          y|Y ) 
-              break
-              ;;
-          n|N ) 
-              echo "Please try again."
-              sleep 2
-              ;;
-          * ) 
-              echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-              sleep 2
-              ;;
-      esac
-    done
+user_input() {
+  confirm_input "Is this the first node in the cluster? (y/n, default: y): " CLIENT_NODE_ true
+
+  if [[ $CLIENT_NODE_ == "true" ]]; then
+    confirm_input "Enter the hostname to use for this additional node (default: akash-node2): " CLIENT_HOSTNAME_ "akash-node2"
+    confirm_input "What is the IP address of akash-node1? : " AKASH_NODE_1_IP_ ""
   fi
 
-  # End of client node check
-fi
+  if [[ $CLIENT_NODE_ == "false" ]]; then
+    confirm_input "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (y/n) " NEW_WALLET_ ""
+    if [[ $NEW_WALLET_ == "false" ]]; then
+      confirm_input "Enter the mnemonic phrase to import your provider wallet: " mnemonic_ "" "validate_mnemonic"
+    fi
 
-# GPU Support
-if lspci | grep -q NVIDIA; then
-  while true; do
-    clear
-    read -p "NVIDIA GPU Detected: Would you like to enable it on this host? (y/n): " GPU_
+    confirm_input "Enter the provider domain name to use for your provider (example.com): " DOMAIN_ ""
+    confirm_input "Do you have a dynamic DNS address or a static IP address? (dynamic/static): " ip_ ""
+  fi
+
+  if lspci | grep -q NVIDIA; then
+    confirm_input "NVIDIA GPU Detected: Would you like to enable it on this host? (y/n): " GPU_ ""
+  fi
+
+  # DNS Record Creation
+  clear
+  if [[ $ip_ == "dynamic" ]]; then
+    echo "Dynamic IP Detected"
+    confirm_input "Enter your dynamic DNS url (e.g., akash.no-ip.com): " DYNAMICIP_ ""
     
-    read -p "Are you sure you want to enable GPU support? ($GPU_) (y/n): " choice
-    
-    case "$choice" in
-        y|Y ) 
-            GPU_=true
-            break
-            ;;
-        n|N ) 
-            echo "Skipping GPU support."
-            GPU_=false
-            sleep 3
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-            sleep 3
-            ;;
-    esac
-  done
-fi
-
-if [[ $CLIENT_NODE_ == "false" ]]; then
-  # Domain is required
-  while true; do
-    clear
-    read -p "Enter the provider domain name to use for your provider (example.com): " DOMAIN_
-    
-    read -p "Are you sure the provider domain is correct? ($DOMAIN_) (y/n): " choice
-    
-    case "$choice" in
-        y|Y ) 
-            break
-            ;;
-        n|N ) 
-            echo "Please try again."
-            sleep 2
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-            sleep 2
-            ;;
-    esac
-  done
-
-  # Dynamic or Static Public IP?
-  while true; do
-    clear
-    read -p "Do you have a dynamic DNS address or a static IP address? ($ip_) (dynamic/static): " choice
-    
-    case "$choice" in
-        dynamic|DYNAMIC ) 
-            ip_=dynamic
-            echo "You chose dynamic IP."
-            break
-            ;;
-        static|STATIC ) 
-            ip_=static
-            echo "You chose static IP."
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'dynamic' or 'static'."
-            sleep 2
-            ;;
-    esac
-  done 
-
-  # End of client_node mode check
-fi
-
-
-
-if [[ $ip_ == "dynamic" ]]; then
-echo "Dynamic IP Detected"
-  echo "You must use a Dynamic DNS / No-IP service."
-    while true
-    do
-    clear
-    read -p "Enter your dynamic DNS url (akash.no-ip.com) : " DYNAMICIP_
-    read -p "Are you sure the dynamic DNS url is correct? : $DYNAMICIP_ (y/n)? " choice
-    case "$choice" in
-      y|Y ) break;;
-      n|N ) echo "Try again" ; sleep 3;;
-      * ) echo "Invalid entry, please try again with Y or N" ; sleep 3;;
-    esac
-    done
-clear
-echo "📝 Creating DNS Records"
-cat <<EOF > ./dns-records.txt
+    cat <<EOF > ./dns-records.txt
 *.ingress 300 IN CNAME nodes.$DOMAIN_.
 nodes 300 IN CNAME $DYNAMICIP_.
 provider 300 IN CNAME nodes.$DOMAIN_.
 rpc 300 IN CNAME nodes.$DOMAIN_.
 EOF
-else
-clear
-echo "📝 Creating DNS Records"
-cat <<EOF > ./dns-records.txt
+  else
+    echo "Static IP setup. Please manually modify the DNS records."
+    cat <<EOF > ./dns-records.txt
 *.ingress 300 IN CNAME nodes.$DOMAIN_.
 nodes 300 IN A X.X.X.X. #IP of this machine and any additional nodes
 nodes 300 IN A X.X.X.X. #IP of any additional nodes
@@ -241,12 +80,11 @@ nodes 300 IN A X.X.X.X. #IP of any additional nodes
 provider 300 IN CNAME nodes.$DOMAIN_.
 rpc 300 IN CNAME nodes.$DOMAIN_.
 EOF
-
-fi
+  fi
 }
 echo "Just a few questions..."
-# Never log
-user_input 
+user_input
+
 
 
 clear
