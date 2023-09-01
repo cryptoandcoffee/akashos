@@ -254,14 +254,6 @@ echo ""
 echo "Sit back and relax - this could take a few minutes or up to an hour depending on your hardware, connection, and choices." 
 echo ""
 
-#read -p "Enter domain name to use for your provider (example.com) : " DOMAIN_
-#read -p "Enter mnemonic phrase to import your provider wallet (KING SKI GOAT...): " mnemonic_
-#read -p "Enter the region for this cluster (us-west/eu-east) : " REGION_
-#read -p "Enter the cpu type for this server (amd/intel) : " CPU_
-#read -p "Enter the download speed of the connection in Mbps (1000) : " DOWNLOAD_
-#read -p "Enter the upload speed of the connection in Mbps (250) : " UPLOAD_
-#read -p "Enter the new keyring password to protect the wallet with (NewWalletPassword): " KEY_SECRET_
-
 #Store securely for user
 KEY_SECRET_=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
 
@@ -308,47 +300,12 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
 
 function k3sup_install(){
 curl -LS https://get.k3sup.dev | sh
-#Previous working before multi-node
-#k3sup install --local --user root --cluster --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable-network-policy --flannel-backend=none"
-
-function nearly_there(){
 LOCAL_IP=$(ip -4 addr show | grep enp* | grep -oP 'inet \K[\d.]+')
 echo 'akash ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
-
 apt-get install -y sshpass
-
 sudo -u akash sshpass -p 'akash' ssh-copy-id -i /home/akash/.ssh/id_rsa.pub -o StrictHostKeyChecking=no akash@$LOCAL_IP
 sudo -u akash sshpass -p 'akash' ssh-copy-id -i /home/akash/.ssh/id_rsa.pub -o StrictHostKeyChecking=no akash@127.0.0.1
-
-#Inbound broken
-# sudo -u akash k3sup install --cluster --user akash --ip $LOCAL_IP --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable network-policy --flannel-backend=none"
-#Testing - makes tls-san 192.168.1.136 for example.
 sudo -u akash k3sup install --cluster --user akash --ip $LOCAL_IP --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable-network-policy --flannel-backend=none"
-
-}
-nearly_there
-
-function tester(){
-# k3sup install --local --token $KEY_SECRET_ --user root --tls-san balance.$DOMAIN_ --cluster --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable-network-policy --flannel-backend=none"
-
-LOCAL_IP=$(ip -4 addr show | grep enp* | grep -oP 'inet \K[\d.]+')
-echo "Found local ip of $LOCAL_IP" 
-# k3sup install --ip $LOCAL_IP --token $KEY_SECRET_ --user akash --tls-san balance.$DOMAIN_ --cluster --k3s-extra-args "--disable-servicelb --disable-traefik --disable-metrics-server --disable-network-policy --flannel-backend=none"
-
-
-
-# Must be enabled for k3sup to join nodes properly
-echo 'akash ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
-
-apt-get install -y sshpass
-sshpass -p 'akash' ssh-copy-id -i /home/akash/.ssh/id_rsa.pub -o StrictHostKeyChecking=no akash@$LOCAL_IP
-
-# k3sup install --user akash --ip $LOCAL_IP --cluster --k3s-extra-args "--disable-servicelb --disable-traefik --disable-metrics-server --disable-network-policy --flannel-backend=none"
-# k3sup install --user akash --ip $LOCAL_IP --cluster --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable network-policy --flannel-backend=none"
-}
-#tester - not working
-
-
 chmod 600 /etc/rancher/k3s/k3s.yaml
 mkdir -p /home/akash/.kube
 # Not all apps use the new default of "config"
@@ -418,16 +375,16 @@ helm install cilium cilium/cilium --wait \
 echo "🕸️ Installing cilium"
 cilium_install &>> /home/akash/logs/installer/cilium.log
 
-echo "Sleep 90 seconds for Cilium then checking Cilium and Cluster are up..."
-sleep 90
+#echo "Sleep 90 seconds for Cilium then checking Cilium and Cluster are up..."
+#sleep 90
 
-cilium status
+#cilium status
 
 # Check the exit status of the 'cilium status' command
-if [ $? -ne 0 ]; then
-    echo "Error: Cilium status check failed"
-    exit 1
-fi
+#if [ $? -ne 0 ]; then
+#    echo "Error: Cilium status check failed"
+#    exit 1
+#fi
 
 kubectl get pods -A -o wide
 
@@ -436,14 +393,6 @@ if [ $? -ne 0 ]; then
     echo "Error: kubectl get pods command failed"
     exit 1
 fi
-
-#k3sup install --ip $SERVER_IP --user $USER --cluster --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable-network-policy --flannel-backend=none"
-#sleep 10
-#cilium install --helm-set bandwidthManager=true --helm-set global.containerRuntime.integration="containerd" --helm-set global.containerRuntime.socketPath="/var/run/k3s/containerd/containerd.sock"
-
-
-
-
 
 function install_akash(){
 #Install Akash and setup wallet
@@ -473,17 +422,8 @@ echo "The QR code will be available in : /home/akash/wallet_qr_code.txt.  You ca
 echo "Your wallet address is : $ACCOUNT_ADDRESS_"
 echo "Find all your configuration details in /home/akash/variables file."
 else
-# ( printf "$mnemonic_\n$KEY_SECRET_\n"; sleep 2; printf "$KEY_SECRET_\n" ) | akash keys add default --recover
-# printf "$mnemonic_\n$KEY_SECRET_\n$KEY_SECRET_\n" | akash keys add default --recover
-# use printf to generate the required input for the akash command
-# input=$(printf "%s\n%s\n%s\n" "$mnemonic_" "$KEY_SECRET_" "$KEY_SECRET_")
-# echo "$input" | akash keys add default --recover
-
 echo -e "$mnemonic_\n$KEY_SECRET_\n$KEY_SECRET_" | akash keys add default --recover
-
-# echo "$KEY_SECRET_ $KEY_SECRET_" | akash keys export default > key.pem
 echo -e "$KEY_SECRET_\n$KEY_SECRET_" | akash keys export default > key.pem
-
 ACCOUNT_ADDRESS_=$(echo $KEY_SECRET_ | akash keys list | grep address | cut -d ':' -f2 | cut -c 2-)
 qrencode -t ASCIIi $(echo $KEY_SECRET_ | akash keys list | grep address | cut -d ':' -f2 | cut -c 2-) > wallet_qr_code.txt
 fi
@@ -563,11 +503,6 @@ chown akash:akash *.sh
 chown akash:akash *.txt
 chown akash:akash variables
 
-#echo "WALLET_FUNDED=0" >> variables
-
-#echo "Firewall Setup Required" 
-#echo "Please forward these ports to the IP of this machine"
-#cat ./firewall-ports.txt
 
 # End node client mode skip
 fi
@@ -580,15 +515,10 @@ echo "AKASH_NODE_1_IP=$AKASH_NODE_1_IP_" >> variables
 hostnamectl set-hostname $CLIENT_HOSTNAME_
 echo $CLIENT_HOSTNAME_ | tee /etc/hostname
 sed -i "s/127.0.1.1 akash-node1/127.0.1.1 $CLIENT_HOSTNAME_/g" /etc/hosts
-#Must get this for remote installs to it
-echo 'akash ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
 else
 echo "CLIENT_NODE=false" >> variables
 echo "CLIENT_HOSTNAME=akash-node1" >> variables
 fi
-
-# Add agent
-# k3sup join --ip $AKASH_NODE_1_IP_ --user akash --server-ip $NEW_NODE_IP
 
 echo "SETUP_COMPLETE=true" >> variables
 
