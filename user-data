@@ -38,7 +38,7 @@ autoinstall:
     - gunicorn
   late-commands:
     - |
-      # Runs after the user logs in
+      # Runs after the user logs in anytime
       cat <<EOF | tee /target/etc/profile.d/akash.sh
       #!/bin/bash
       clear
@@ -72,8 +72,8 @@ autoinstall:
       |  Default Password : akash
       |  Default Hostname : \n
       |  IP Address       : \4
-      |  ISO Version      : v0.5 Alpha - k3s ONLY + Dashboard
-      |  News:            : k3s support is in development.
+      |  ISO Version      : v0.5 Alpha
+      |  News:            : GPU is now supported with k3s.
       |
       |--------------------------------------------------------------------------------------|
       | Web Dashboard : Open http://\4:8080 to finish the configuration.
@@ -117,22 +117,15 @@ autoinstall:
     # Remove extra cloud-init messages
     - curtin in-target -- sed -i '/keys-to-console/d' /etc/cloud/cloud.cfg
     - curtin in-target -- sed -i '/final-message/d' /etc/cloud/cloud.cfg
+    - curtin in-target -- systemctl disable getty@tty1.service && systemctl disable ssh
     - curtin in-target -- apt-get autoremove --purge -y && apt-get autoclean -y && apt-get clean -y
+    - echo "The default username is 'akash' and the default password is 'akash'"
+    - echo "AkashOS is ready! Remove the CD and reboot."
+  #Runs only once during the initial boot after installation of the ISO
   user-data:
     disable_root: false
     runcmd:
       - |
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;32m  PLEASE WAIT UNTIL YOU SEE: AKASHOS READY TO LOGIN\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
         chown akash:akash /etc/systemd/system/gunicorn.service
         chmod 664 /etc/systemd/system/gunicorn.service
         chown akash:akash /etc/profile.d/akash.sh
@@ -142,24 +135,13 @@ autoinstall:
         sudo -u akash touch /home/akash/.hushlogin
         sudo -u akash git clone https://github.com/cryptoandcoffee/akashos-dashboard/ /home/akash/dashboard >/dev/null 2>&1
         sudo -u akash pip install --user -r /home/akash/dashboard/requirements.txt >/dev/null 2>&1
-        systemctl enable --now gunicorn >/dev/null 2>&1
         mkdir -p /home/akash/.ssh
         KEY_LOCATION="/home/akash/.ssh/id_rsa"
         PASSPHRASE=""
         HOSTNAME="akash-node-1"
         ssh-keygen -t rsa -C "$HOSTNAME" -f "$KEY_LOCATION" -P "$PASSPHRASE" >/dev/null 2>&1
         chown -R akash:akash /home/akash/
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;32m  AKASHOS READY TO LOGIN\033[0m"
-        echo "\033[1;32mUSER     : \033[1;36m akash\033[0m"
-        echo "\033[1;32mPASSWORD : \033[1;36m akash\033[0m"
-        echo "\033[1;32m  HIT ENTER TO PROCEED\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
-        echo "\033[1;35m--------------------------\033[0m"
+        #System ready - show login and enable sshd and dashboard
+        systemctl enable --now ssh >/dev/null 2>&1
+        systemctl enable --now gunicorn >/dev/null 2>&1
+        systemctl enable --now getty@tty1.service >/dev/null 2>&1
