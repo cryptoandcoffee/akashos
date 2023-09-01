@@ -7,16 +7,16 @@ function user_input(){
 
 while true; do
     clear
-    read -p "Is this setup for a client node? (y/n, default: n): " choice
+    read -p "Is this setup for the first node/machine in the cluster? (y/n, default: y): " choice
 
     case "$choice" in
-        y|Y ) 
+        n|N ) 
             CLIENT_NODE_=true
             echo "Client node setup selected."
             sleep 2
             break
             ;;
-        n|N ) 
+        y|Y ) 
             CLIENT_NODE_=false
             echo "Initial setup for akash-node1 selected."
             sleep 2
@@ -83,7 +83,7 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
   # Check if the user has an Akash wallet
   while true; do
     clear
-    read -p "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (y/n) " choice
+    read -p "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (y/n, default: n): " choice
 
     case "$choice" in
         y|Y ) 
@@ -134,7 +134,7 @@ fi
 if lspci | grep -q NVIDIA; then
   while true; do
     clear
-    read -p "NVIDIA GPU Detected: Would you like to enable it on this host? (y/n): " GPU_
+    read -p "NVIDIA GPU Detected: Would you like to enable it on this host? (y/n, default: y): " GPU_
     
     read -p "Are you sure you want to enable GPU support? ($GPU_) (y/n): " choice
     
@@ -161,7 +161,7 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
   # Domain is required
   while true; do
     clear
-    read -p "Enter the provider domain name to use for your provider (example.com): " DOMAIN_
+    read -p "Enter the domain name to use for your provider (example.com): " DOMAIN_
     
     read -p "Are you sure the provider domain is correct? ($DOMAIN_) (y/n): " choice
     
