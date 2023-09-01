@@ -23,7 +23,7 @@ kubectl label ns akash-services akash.network/name=akash-services akash.network=
 kubectl create ns lease
 kubectl label ns lease akash.network=true
 
-kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/v0.2.1/pkg/apis/akash.network/crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/v0.4.0/pkg/apis/akash.network/crd.yaml
 
 # Node
 helm upgrade --install akash-node akash/akash-node -n akash-services \
@@ -31,10 +31,12 @@ helm upgrade --install akash-node akash/akash-node -n akash-services \
   --set akash_node.minimum_gas_prices=0uakt \
   --set state_sync.enabled=false \
   --set akash_node.snapshot_provider=polkachu \
-  --set resources.limits.cpu="4" \
+  --set resources.limits.cpu="2" \
   --set resources.limits.memory="8Gi" \
-  --set resources.requests.cpu="2" \
+  --set resources.requests.cpu="0.5" \
   --set resources.requests.memory="4Gi"
+
+kubectl set env statefulset/akash-node-1 AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=100 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY=100 -n akash-services
 
 # Provider
 helm upgrade --install akash-provider akash/provider -n akash-services \
@@ -53,13 +55,13 @@ helm upgrade --install akash-provider akash/provider -n akash-services \
              --set bidpricescript="$(cat bid-engine-script.sh | openssl base64 -A)" \
              --set node=$NODE \
              --set log_restart_patterns="rpc node is not catching up|bid failed" \
-             --set resources.limits.cpu="2" \
+             --set resources.limits.cpu="1" \
              --set resources.limits.memory="2Gi" \
-             --set resources.requests.cpu="1" \
+             --set resources.requests.cpu="0.5" \
              --set resources.requests.memory="1Gi"
 
 # Provider customizations
-kubectl set env statefulset/akash-provider AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=1h -n akash-services
+kubectl set env statefulset/akash-provider AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=72h -n akash-services
 
 # Hostname Operator
 helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services
