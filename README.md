@@ -55,12 +55,17 @@ Software Dependencies: ~30 minutes
 5. Balena Etcher / Rufus / Ventoy
 6. Dynamic DNS update client and domain for residential IP's
 
-## Hardware
+## Hardware Requirements First Node
 
-- 2 core / 4 threads
-- 256Mb memory (k3s)
-- 4Gb memory (microk8s/kubespray)
-- 128Gb HD / Disk Drive
+- 2 CPU / 4 Threads
+- 8Gb Memory 
+- 32Gb Disk 
+
+## Hardware Requirements Additional Nodes
+
+- 1 CPU 
+- 2Gb Memory 
+- 8Gb Disk
 
 # Installation Instructions
 Default Username : akash
