@@ -145,3 +145,4 @@ autoinstall:
         systemctl enable --now ssh >/dev/null 2>&1
         systemctl enable --now gunicorn >/dev/null 2>&1
         systemctl enable --now getty@tty1.service >/dev/null 2>&1
+        apt-get remove --purge cloud-init -y >/dev/null 2>&1
