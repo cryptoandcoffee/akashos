@@ -98,9 +98,9 @@ helm upgrade --install akash-provider akash/provider -n akash-services \
              --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
              --set node=$NODE \
              --set log_restart_patterns="rpc node is not catching up|bid failed" \
-             --set resources.limits.cpu="2" \
+             --set resources.limits.cpu="1" \
              --set resources.limits.memory="2Gi" \
-             --set resources.requests.cpu="1" \
+             --set resources.requests.cpu="0.5" \
              --set resources.requests.memory="1Gi"
 
 # Provider customizations
