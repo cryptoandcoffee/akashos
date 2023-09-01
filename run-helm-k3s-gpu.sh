@@ -5,7 +5,7 @@ export KUBECONFIG=/home/akash/.kube/kubeconfig
 DOMAIN="$DOMAIN"
 ACCOUNT_ADDRESS="$ACCOUNT_ADDRESS"
 KEY_SECRET="$KEY_SECRET"
-CHAIN_ID="testnet-02"
+CHAIN_ID=akashnet-02
 REGION="$REGION"
 CHIA_PLOTTING=false
 CPU="$CPU"
@@ -69,16 +69,17 @@ kubectl label ingressclass akash-ingress-class akash.network=true
 ingress_charts
 
 # Node
-helm upgrade --install akash-node akash/akash-node -n akash-services --set image.tag="0.24.0" \
+helm upgrade --install akash-node akash/akash-node -n akash-services \
   --set akash_node.moniker="AkashOS" \
   --set akash_node.chainid=$CHAIN_ID \
   --set akash_node.api_enable=true \
   --set akash_node.minimum_gas_prices=0uakt \
   --set resources.limits.cpu="2" \
   --set resources.limits.memory="8Gi" \
-  --set resources.requests.cpu="1" \
+  --set resources.requests.cpu="0.5" \
   --set resources.requests.memory="4Gi"
 
+kubectl set env statefulset/akash-node-1 AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=100 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY=100 -n akash-services
 
 # Run nvidia-smi command to get GPU information
 gpu_info="$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)"
@@ -93,7 +94,6 @@ for model in $gpu_models; do
 done
 
 helm_command="helm upgrade --install akash-provider akash/provider -n akash-services \
---set image.tag=\"0.24.0\" \
 --set attributes[0].key=region --set attributes[0].value=\"$REGION\" \
 --set attributes[1].key=chia-plotting --set attributes[1].value=\"$CHIA_PLOTTING\" \
 --set attributes[2].key=host --set attributes[2].value=\"$HOST\" \
