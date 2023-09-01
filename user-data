@@ -101,6 +101,8 @@ autoinstall:
       [Install]
       WantedBy=multi-user.target
       EOF
+    #Temporarily disable tty and ssh so user doesn't interrupt user-data first boot install by accident
+    - curtin in-target -- systemctl disable getty@tty1.service && systemctl disable ssh
     - chmod +x /target/etc/profile.d/akash.sh
     - sed -i 's/ENABLED=1/ENABLED=0/' /target/etc/default/motd-news
     - sed -i 's/#PrintLastLog yes/PrintLastLog no/' /target/etc/ssh/sshd_config
@@ -114,10 +116,6 @@ autoinstall:
       sed -i /etc/default/grub -e
       's/GRUB_CMDLINE_LINUX_DEFAULT=".*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/'
     - curtin in-target -- update-grub
-    # Remove extra cloud-init messages
-    - curtin in-target -- sed -i '/keys-to-console/d' /etc/cloud/cloud.cfg
-    - curtin in-target -- sed -i '/final-message/d' /etc/cloud/cloud.cfg
-    - curtin in-target -- systemctl disable getty@tty1.service && systemctl disable ssh
     - curtin in-target -- apt-get autoremove --purge -y && apt-get autoclean -y && apt-get clean -y
     - echo "The default username is 'akash' and the default password is 'akash'"
     - echo "AkashOS is ready! Remove the CD and reboot."
@@ -145,4 +143,4 @@ autoinstall:
         systemctl enable --now ssh >/dev/null 2>&1
         systemctl enable --now gunicorn >/dev/null 2>&1
         systemctl enable --now getty@tty1.service >/dev/null 2>&1
-        apt-get remove --purge cloud-init -y >/dev/null 2>&1
+        touch /etc/cloud/cloud-init.disabled
