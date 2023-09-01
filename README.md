@@ -1,8 +1,8 @@
 # AkashOS - Akash Provider OS  - Ubuntu Server 22.04 Edition
 
-AkashOS is an unattended install of Ubuntu Server that will become the operating system of the machine.  Akash OS will create a Kubernetes cluster and configure it as an Akash provider.
+AkashOS is an unattended install of Ubuntu Server uses [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/).  AkashOS will automatically create a Kubernetes cluster and configure itself as an Akash provider. 
 
-Attach ISO to > Provider Host Machine
+Attach ISO to > Provider Host Machine / VPS / Bare-Metal
 
 # Supported Kubernetes installation methods
 
