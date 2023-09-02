@@ -3,6 +3,25 @@
 AkashOS is an unattended install of Ubuntu Server uses [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/).  AkashOS will automatically create a Kubernetes cluster and configure itself as an Akash provider. 
 
 Attach ISO to > Provider Host Machine / VPS / Bare-Metal
+```
+     Akash Provider
+           ||
+     -------------
+    | Helm Charts |
+     -------------
+           ||
+     -------------
+   |  Kubernetes  |
+     -------------
+           ||
+  -----------------------
+|     cloud-init         |
+  -----------------------
+           ||
+     -----------------------
+|  Ubuntu 22.04 AutoInstall |
+  --------------------------
+```
 
 # Supported Kubernetes installation methods
 
