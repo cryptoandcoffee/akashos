@@ -78,6 +78,11 @@ Default Password : akash
 3. Start the VM
 4. Reboot when install completed and detach the ISO.
 6. Login with default username and password, follow the on-screen instructions.
+7. Once the system has rebooted, goto the Control Panel address.
+8. Update the provider attributes with the recommended values and click Save.
+9. Click STOP next to Provider.
+10. Click Re-Deploy Provider Button.
+11. Send at least 5 AKT to the new wallet address to start the provider.
 
 ## Bare Metal Datacenter with IPMI/ISO Support
 
@@ -86,6 +91,11 @@ Default Password : akash
 3. Start the machine with the ISO for the boot drive (F11 may be required)
 4. Reboot when install completed and detach the ISO.
 6. Login with default username and password, follow the on-screen instructions.
+7. Once the system has rebooted, goto the Control Panel address.
+8. Update the provider attributes with the recommended values and click Save.
+9. Click STOP next to Provider.
+10. Click Re-Deploy Provider Button.
+11. Send at least 5 AKT to the new wallet address to start the provider.
 
 ## USB Key
 
@@ -95,6 +105,11 @@ Default Password : akash
 4. Start the machine with the USB key for the boot drive (F11 may be required)
 5. Reboot when install completed and unplug the USB key.
 6. Login with default username and password, follow the on-screen instructions.
+7. Once the system has rebooted, goto the Control Panel address.
+8. Update the provider attributes with the recommended values and click Save.
+9. Click STOP next to Provider.
+10. Click Re-Deploy Provider Button.
+11. Send at least 5 AKT to the new wallet address to start the provider.
 
 
 
