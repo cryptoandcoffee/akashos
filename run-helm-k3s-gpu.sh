@@ -93,6 +93,7 @@ for model in $gpu_models; do
         $label_command
 done
 
+needs_work(){
 helm_command="helm upgrade --install akash-provider akash/provider -n akash-services \
 --set attributes[0].key=region --set attributes[0].value=\"$REGION\" \
 --set attributes[1].key=chia-plotting --set attributes[1].value=\"$CHIA_PLOTTING\" \
@@ -122,6 +123,37 @@ helm_command+=" --set chainid=\"$CHAIN_ID\" \
 --set log_restart_patterns=\"rpc node is not catching up\""
 
 eval "$helm_command"
+}
+
+helm upgrade --install akash-provider akash/provider -n akash-services \
+             --set attributes[0].key=region --set attributes[0].value=$REGION \
+             --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
+             --set attributes[2].key=host --set attributes[2].value=$HOST \
+             --set attributes[3].key=cpu --set attributes[3].value=$CPU \
+             --set attributes[4].key=tier --set attributes[4].value=$TIER \
+             --set attributes[5].key=organization --set attributes[5].value=$ORG \
+             --set attributes[6].key=network_download --set attributes[6].value=$DOWNLOAD \
+             --set attributes[7].key=network_upload --set attributes[7].value=$UPLOAD \
+             --set attributes[8].key=status --set attributes[8].value=https://status.$DOMAIN \
+             --set attributes[9].key=capabilities/storage/1/class --set attributes[9].value=beta1 \
+             --set attributes[10].key=capabilities/storage/1/persistent --set attributes[10].value=false \
+             --set attributes[11].key=capabilities/storage/2/class --set attributes[11].value=beta2 \
+             --set attributes[12].key=capabilities/storage/2/persistent --set attributes[12].value=false \
+             --set attributes[13].key=capabilities/storage/3/class --set attributes[13].value=beta3 \
+             --set attributes[14].key=capabilities/storage/3/persistent --set attributes[14].value=false \
+             --set attributes[15].key=capabilities/gpu/vendor/nvidia/model/1080ti --set attributes[15].value=false \
+             --set from=$ACCOUNT_ADDRESS \
+             --set key="$(cat /home/akash/key.pem | base64)" \
+             --set keysecret="$(echo $KEY_SECRET | base64)" \
+             --set domain=$DOMAIN \
+             --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
+             --set node=$NODE \
+             --set log_restart_patterns="rpc node is not catching up|bid failed" \
+             --set resources.limits.cpu="1" \
+             --set resources.limits.memory="2Gi" \
+             --set resources.requests.cpu="0.5" \
+             --set resources.requests.memory="1Gi"
+
 
 # Provider customizations
 kubectl set env statefulset/akash-provider AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=72h -n akash-services
