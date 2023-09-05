@@ -24,7 +24,7 @@ kubectl label ns akash-services akash.network/name=akash-services akash.network=
 kubectl create ns lease
 kubectl label ns lease akash.network=true
 
-kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/v0.4.0/pkg/apis/akash.network/crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/v0.4.6/pkg/apis/akash.network/crd.yaml
 
 # Ingress Operator
 ingress_charts(){
