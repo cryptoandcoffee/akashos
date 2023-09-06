@@ -42,9 +42,9 @@ def connect_ports(port_list, protocol=""):
 def main():
     print("🌟 Starting the chisel client setup... 🌟")
 
-    # Connect fixed ports first 🛠️
-    connect_ports(fixed_ports)
-    print(f"🎯 Fixed ports {fixed_ports} connected! 🎉")
+    # Connect fixed ports first with TCP 🛠️
+    connect_ports(fixed_ports, "/tcp")
+    print(f"🎯 Fixed ports {fixed_ports} connected with TCP! 🎉")
     
     # Connect range of ports 🌈
     for i in range(30000, 32768, 500):
