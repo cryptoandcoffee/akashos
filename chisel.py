@@ -4,7 +4,7 @@ import signal
 import atexit
 
 # Global settings 🌍
-server_ip, server_port, local_ip, auth = "207.246.127.155", "8000", "localhost", "akash:zebrasquareparty1orkcn1"
+server_ip, server_port, local_ip, auth = "207.246.127.155", "8000", "localhost", "akash:akash"
 fixed_ports = [80, 443, 1317, 26656, 26657, 8443]
 commands = []
 
