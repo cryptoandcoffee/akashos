@@ -1,0 +1,12 @@
+[Unit]
+Description=Chisel Port Forwarding Service for Akash Provider
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/akash/chisel.py
+Restart=always
+User=akash
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
