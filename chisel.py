@@ -3,6 +3,8 @@ import time
 import signal
 import atexit
 
+#Replace x.x.x.x with the public IP of your Chisel server and akash:akash with a unique username and password.
+
 # Global settings 🌍
 server_ip, server_port, local_ip, auth = "x.x.x.x", "8000", "localhost", "akash:akash"
 fixed_ports = [80, 443, 1317, 26656, 26657, 8443]
@@ -55,12 +57,15 @@ def main():
     print("✨ All ports successfully connected! ✨")
 
     # Monitor and restart subprocesses 👀
-    print("👀 Monitoring subprocesses... 👀")
+    print("👀 Starting to monitor subprocesses... 👀")
     while True:
+        reconnected = False
         for cmd in commands:
             if subprocess.run(["pgrep", "-f", " ".join(cmd)]).returncode != 0:
-                print(f"🔄 Reconnecting chisel client: {' '.join(cmd)} 🚀")
                 subprocess.Popen(cmd)
+                reconnected = True
+        if reconnected:
+            print("🔄 Successfully reconnected disconnected clients! 🚀")
         time.sleep(60)
 
 if __name__ == "__main__":
