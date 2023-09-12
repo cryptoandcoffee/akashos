@@ -136,12 +136,12 @@ helm upgrade --install akash-provider akash/provider -n akash-services \
              --set attributes[7].key=network_upload --set attributes[7].value=$UPLOAD \
              --set attributes[8].key=status --set attributes[8].value=https://status.$DOMAIN \
              --set attributes[9].key=capabilities/storage/1/class --set attributes[9].value=beta1 \
-             --set attributes[10].key=capabilities/storage/1/persistent --set attributes[10].value=false \
+             --set attributes[10].key=capabilities/storage/1/persistent --set attributes[10].value=true \
              --set attributes[11].key=capabilities/storage/2/class --set attributes[11].value=beta2 \
-             --set attributes[12].key=capabilities/storage/2/persistent --set attributes[12].value=false \
+             --set attributes[12].key=capabilities/storage/2/persistent --set attributes[12].value=true \
              --set attributes[13].key=capabilities/storage/3/class --set attributes[13].value=beta3 \
-             --set attributes[14].key=capabilities/storage/3/persistent --set attributes[14].value=false \
-             --set attributes[15].key=capabilities/gpu/vendor/nvidia/model/1080ti --set attributes[15].value=false \
+             --set attributes[14].key=capabilities/storage/3/persistent --set attributes[14].value=true \
+             --set attributes[15].key=capabilities/gpu/vendor/nvidia/model/1080ti --set attributes[15].value=true \
              --set from=$ACCOUNT_ADDRESS \
              --set key="$(cat /home/akash/key.pem | base64)" \
              --set keysecret="$(echo $KEY_SECRET | base64)" \
