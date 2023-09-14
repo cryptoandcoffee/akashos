@@ -130,6 +130,13 @@ Default Password : akash
 10. Click Re-Deploy Provider Button.
 11. Send at least 5 AKT to the new wallet address to start the provider.
 
-
-
+Todos:
+-When changing pricing params, delete the configmap akash-provider-bidscripts from akash-services before re-deploy
+-Remove static/dynamic question during initial boot, confusing to user
+-Show nodes in cluster on Dashboard with kubectl get nodes -A -o wide
+-Allow adding new node to cluster with just IP address
+-Remove question for adding node to cluster for original IP, all add/remove operations should happen from Dashboard only
+-Update run-helm-k3s to use functions so each can be called seperately
+-Update bid-engine script with latest
+-Add/Remove Attributes from Dashboard and default GPU etc
 
