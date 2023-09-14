@@ -1,113 +1,153 @@
 #!/bin/bash
-# WARNING: the runtime of this script should NOT exceed 5 seconds!
-# Requirements:
-# curl jq bc mawk ca-certificates
-set -o pipefail
 
-# Example:
-# Say you have some accounts (typically yours) you want your provider bid the cheapest (1uakt, about 0.42 AKT/month),
-# you can use the following snippet:
-# # Alice: akash1fxa9ss3dg6nqyz8aluyaa6svypgprk5tw9fa4q
-# # Bob: akash1fhe3uk7d95vvr69pna7cxmwa8777as46uyxcz8
-# if [[ "$AKASH_OWNER" == @(akash1fxa9ss3dg6nqyz8aluyaa6svypgprk5tw9fa4q|akash1fhe3uk7d95vvr69pna7cxmwa8777as46uyxcz8) ]]; then
-#   echo 0.1
-#   exit 0
-# fi
+# Function to fetch the AKT to USD exchange rate
+fetch_akt_to_usd() {
+    for url in "https://api-osmosis.imperator.co/tokens/v2/price/AKT" \
+        "https://api.kraken.com/0/public/Ticker?pair=AKTUSD" \
+        "https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=AKT-USDT"; do
+        usd_per_akt=$(curl -s "$url" | jq -r '.data.price // .price // .result.AKTUSD.a[0]')
+        if [[ -n $usd_per_akt && $usd_per_akt != "0" ]]; then
+            break
+        fi
+    done
 
+    if [[ -z $usd_per_akt || $usd_per_akt == "0" ]]; then
+        exit 1
+    fi
+}
+
+# Function to calculate total resource costs in USD
+calculate_total_cost_usd() {
+    local data=$1
+
+    # Extract resource quantities
+    local cpu=$(jq -r '(map(.cpu * .count) | add) / 1000' <<<"$data")
+    local memory=$(jq -r '(map(.memory * .count) | add) / pow(1024; 3)' <<<"$data")
+    local ephemeral_storage=$(jq -r '[.[] | (.storage[] | select(.class == "ephemeral").size // 0) * .count] | add / pow(1024; 3)' <<<"$data")
+    local hdd_storage=$(jq -r '[.[] | (.storage[] | select(.class == "beta1").size // 0) * .count] | add / pow(1024; 3)' <<<"$data")
+    local ssd_storage=$(jq -r '[.[] | (.storage[] | select(.class == "beta2").size // 0) * .count] | add / pow(1024; 3)' <<<"$data")
+    local nvme_storage=$(jq -r '[.[] | (.storage[] | select(.class == "beta3").size // 0) * .count] | add / pow(1024; 3)' <<<"$data")
+    local endpoints=$(jq -r '(map(.endpoint_quantity // 0 * .count) | add)' <<<"$data")
+    local ips=$(jq -r '(map(.ip_lease_quantity // 0 * .count) | add)' <<<"$data")
+    local gpu_units=$(jq -r '[.[] | (.gpu.units // 0) * .count] | add' <<<"$data")
+    local gpu_model=$(jq -r '.[0].gpu.attributes.vendor.nvidia.model' <<<"$data")
+
+    # Define target prices for different resources
+    TARGET_CPU="5.00"
+    TARGET_MEMORY="0.75"
+    TARGET_EPHEMERAL_STORAGE="0.25"
+    TARGET_HDD_STORAGE="0.1667"
+    TARGET_SSD_STORAGE="0.3333"
+    TARGET_NVME_STORAGE="0.50"
+    TARGET_ENDPOINT="0.01"
+    TARGET_IP="2.00"
+
+
+    # Define an associative array for GPU TFLOPS
+    declare -A GPU_TFLOPS
+
+    GPU_TFLOPS=(
+        ["750Ti"]="1.3"
+        ["950"]="1.6"
+        ["1050"]="1.8"
+        ["1050Ti"]="2.1"
+        ["960"]="2.3"
+        ["970"]="3.9"
+        ["980"]="5.6"
+        ["980Ti"]="6.1"
+        ["1060"]="4"
+        ["1070"]="6.5"
+        ["1070Ti"]="8"
+        ["1080"]="9"
+        ["1080Ti"]="11.3"
+        ["1650"]="2.9"
+        ["1650Ti"]="3"
+        ["1660"]="5"
+        ["1660Ti"]="5.5"
+        ["1660S"]="5.7"
+        ["2060"]="6.5"
+        ["2060S"]="7.2"
+        ["2070"]="7.9"
+        ["2070S"]="9.1"
+        ["2080"]="10"
+        ["2080S"]="11.1"
+        ["2080Ti"]="13.4"
+        ["3060"]="13"
+        ["3060Ti"]="16.2"
+        ["3070"]="20"
+        ["3070Ti"]="22"
+        ["3080"]="30"
+        ["3080Ti"]="34"
+        ["3090"]="36"
+        ["4060"]="15.11"
+        ["4060Ti"]="22.06"
+        ["4070"]="29.15"
+        ["4070Ti"]="40.09"
+        ["4080"]="48.75"
+        ["4080Ti"]="67.58"
+        ["4090"]="82.58"
+        ["K20"]="3.52"
+        ["K40"]="4.29"
+        ["K80"]="8.74"
+        ["M4"]="2.2"
+        ["M40"]="6.8"
+        ["M60"]="10"
+        ["M2090"]="1.33"
+        ["P4"]="5.5"
+        ["P40"]="12"
+        ["P100"]="9.3"
+        ["T4"]="8.1"
+        ["V100"]="14"
+        ["V100S"]="16.4"
+        ["A100"]="19.5"
+        ["A10"]="31.4"
+        ["A30"]="28.8"
+        ["A40"]="37.4"
+    )
+
+    # Base price $USD and TFLOPS for the reference model (1080Ti in this example)
+    BASE_PRICE="50"
+    BASE_TFLOPS=${GPU_TFLOPS["1080Ti"]}
+
+    # Case-insensitive lookup in associative array
+    TFLOPS=""
+    for key in "${!GPU_TFLOPS[@]}"; do
+        normalized_key=$(echo "$key" | tr -d '[:space:]')
+        if [[ ${normalized_key,,} == "${gpu_model,,}" ]]; then
+            TFLOPS=${GPU_TFLOPS[$key]}
+            break
+        fi
+    done
+
+    # If no match, use the most expensive card as default
+    if [ -z "$TFLOPS" ]; then
+        TFLOPS=${GPU_TFLOPS["4090"]}
+    fi
+
+    TARGET_GPU_UNIT=$(echo "$BASE_PRICE * ($TFLOPS / $BASE_TFLOPS)" | bc)
+
+    # Total cost in USD
+    total_cost_usd_target=$(bc -l <<<"($cpu * $TARGET_CPU) + ($memory * $TARGET_MEMORY) + ($ephemeral_storage * $TARGET_EPHEMERAL_STORAGE) + ($hdd_storage * $TARGET_HDD_STORAGE) + ($ssd_storage * $TARGET_SSD_STORAGE) + ($nvme_storage * $TARGET_NVME_STORAGE) + ($endpoints * $TARGET_ENDPOINT) + ($ips * $TARGET_IP) + ($gpu_units * $TARGET_GPU_UNIT)")
+}
+
+# Fetch AKT to USD rate
+fetch_akt_to_usd
+
+# Read JSON input
 data_in=$(jq .)
 
-## DEBUG
-if ! [[ -z $DEBUG_BID_SCRIPT ]]; then
-  echo "$(TZ=UTC date -R)" >> /tmp/${AKASH_OWNER}.log
-  echo "$data_in" >> /tmp/${AKASH_OWNER}.log
+# Calculate total cost in USD
+calculate_total_cost_usd "$(jq -r '.resources' <<<"$data_in")"
+
+TARGET_MIN_USD=$(awk "BEGIN {print (($TARGET_MEMORY + $TARGET_EPHEMERAL_STORAGE + $TARGET_CPU))}") #Dynamically calculate - removed /1.25
+TARGET_MIN_UAKT=$(awk "BEGIN {print (($TARGET_MIN_USD * 1000000) / ($usd_per_akt * 425940.524781341))}") #Converts the MIN_USD to uakt
+
+total_cost_akt_target=$(awk "BEGIN {print ($total_cost_usd_target/$usd_per_akt)}")
+total_cost_uakt_target=$(awk "BEGIN {print ($total_cost_akt_target*1000000)}")
+cost_per_block=$(awk "BEGIN {print ($total_cost_uakt_target/425940.524781341)}")
+
+if (( $(echo "$cost_per_block < $TARGET_MIN_UAKT" | bc -l) )); then
+  cost_per_block=$TARGET_MIN_UAKT
 fi
 
-cpu_requested=$(echo "$data_in" | jq -r '(map(.cpu * .count) | add) / 1000')
-memory_requested=$(echo "$data_in" | jq -r '(map(.memory * .count) | add) / pow(1024; 3)' | awk '{printf "%.12f\n", $0}')
-ephemeral_storage_requested=$(echo "$data_in" | jq -r '[.[] | (.storage[] | select(.class == "ephemeral").size // 0) * .count] | add / pow(1024; 3)' | awk '{printf "%.12f\n", $0}')
-hdd_pers_storage_requested=$(echo "$data_in" | jq -r '[.[] | (.storage[] | select(.class == "beta1").size // 0) * .count] | add / pow(1024; 3)' | awk '{printf "%.12f\n", $0}')
-ssd_pers_storage_requested=$(echo "$data_in" | jq -r '[.[] | (.storage[] | select(.class == "beta2").size // 0) * .count] | add / pow(1024; 3)' | awk '{printf "%.12f\n", $0}')
-nvme_pers_storage_requested=$(echo "$data_in" | jq -r '[.[] | (.storage[] | select(.class == "beta3").size // 0) * .count] | add / pow(1024; 3)' | awk '{printf "%.12f\n", $0}')
-ips_requested=$(echo "$data_in" | jq -r '(map(.ip_lease_quantity//0 * .count) | add)')
-endpoints_requested=$(echo "$data_in" | jq -r '(map(.endpoint_quantity//0 * .count) | add)')
-gpu_units_requested=$(echo "$data_in" | jq -r '[.[] | (.gpu.units // 0) * .count] | add')
-
-# cache AKT price for 60 minutes to reduce the API pressure as well as to slightly accelerate the bidding (+5s)
-CACHE_FILE=/tmp/aktprice.cache
-if ! test $(find $CACHE_FILE -mmin -60 2>/dev/null); then
-  ## cache expired
-  usd_per_akt=$(curl -s --connect-timeout 3 --max-time 3 -X GET 'https://api-osmosis.imperator.co/tokens/v2/price/AKT' -H 'accept: application/json' | jq -r '.price' 2>/dev/null)
-  if [[ $? -ne 0 ]] || [[ $usd_per_akt == "null" ]] || [[ -z $usd_per_akt ]]; then
-    # if Osmosis API fails, try CoinGecko API
-    usd_per_akt=$(curl -s --connect-timeout 3 --max-time 3 -X GET "https://api.coingecko.com/api/v3/simple/price?ids=akash-network&vs_currencies=usd" -H  "accept: application/json" | jq -r '[.[]][0].usd' 2>/dev/null)
-  fi
-
-  # update the cache only when API returns a result.
-  # this way provider will always keep bidding even if API temporarily breaks (unless pod gets restarted which will clear the cache)
-  if [ ! -z $usd_per_akt ]; then
-    # check price is an integer/floating number
-    re='^[0-9]+([.][0-9]+)?$'
-    if ! [[ $usd_per_akt =~ $re ]]; then
-      echo "$usd_per_akt is not an integer/floating number!" >&2
-      exit 1
-    fi
-
-    # make sure price is in the permitted range
-    if ! (( $(echo "$usd_per_akt > 0" | bc -l) && \
-            $(echo "$usd_per_akt <= 1000000" | bc -l) )); then
-      echo "$usd_per_akt is outside the permitted range (>0, <=1000000)" >&2
-      exit 1
-    fi
-
-    echo "$usd_per_akt" > $CACHE_FILE
-  fi
-
-  # TODO: figure some sort of monitoring to inform the provider in the event API breaks
-fi
-
-# Fail if script can't read CACHE_FILE for some reason
-set -e
-usd_per_akt=$(cat $CACHE_FILE)
-set +e
-
-#Price in USD/month
-# Hetzner: CPX51 with 16CPU, 32RAM, 360GB disk = $65.81
-# Akash: `(1.60*16)+(0.80*32)+(0.04*360)` = $65.60
-TARGET_CPU="5.00"          # USD/thread-month
-TARGET_MEMORY="0.75"       # USD/GB-month
-TARGET_HD_EPHEMERAL="0.35" # USD/GB-month
-TARGET_HD_PERS_HDD="0.01"  # USD/GB-month (beta1)
-TARGET_HD_PERS_SSD="0.03"  # USD/GB-month (beta2)
-TARGET_HD_PERS_NVME="0.04" # USD/GB-month (beta3)
-TARGET_ENDPOINT="0.05"     # USD for port/month
-TARGET_IP="5"              # USD for IP/month
-TARGET_GPU_UNIT="350"      # USD/GPU unit a month
-
-total_cost_usd_target=$(bc -l <<< "( \
-  ($cpu_requested * $TARGET_CPU) + \
-  ($memory_requested * $TARGET_MEMORY) + \
-  ($ephemeral_storage_requested * $TARGET_HD_EPHEMERAL) + \
-  ($hdd_pers_storage_requested * $TARGET_HD_PERS_HDD) + \
-  ($ssd_pers_storage_requested * $TARGET_HD_PERS_SSD) + \
-  ($nvme_pers_storage_requested * $TARGET_HD_PERS_NVME) + \
-  ($endpoints_requested * $TARGET_ENDPOINT) + \
-  ($ips_requested * $TARGET_IP) + \
-  ($gpu_units_requested * $TARGET_GPU_UNIT) \
-  )")
-
-# average block time: 6.117 seconds (based on the time diff between 8090658-8522658 heights [with 432000 blocks as a shift in between if considering block time is 6.0s "(60/6)*60*24*30"])
-# average number of days in a month: 30.437
-# (60/6.117)*24*60*30.437 = 429909 blocks per month
-
-total_cost_akt_target=$(bc -l <<<"(${total_cost_usd_target}/$usd_per_akt)")
-total_cost_uakt_target=$(bc -l <<<"(${total_cost_akt_target}*1000000)")
-cost_per_block=$(bc -l <<<"(${total_cost_uakt_target}/429909)")
-total_cost_uakt=$(echo "$cost_per_block" | jq 'def ceil: if . | floor == . then . else . + 1.0 | floor end; .|ceil')
-
-# Only bid on GPU SDL
-if (( $(bc <<< "$gpu_units_requested < 1") )); then
-  echo "Skipping bid. gpu_units_requested < 1" >&2
-  exit 1
-else
-  echo $total_cost_uakt
-fi
+printf "%.4f\n" "$cost_per_block"
