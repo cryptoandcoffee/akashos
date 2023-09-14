@@ -42,7 +42,6 @@ calculate_total_cost_usd() {
     TARGET_ENDPOINT="0.01"
     TARGET_IP="2.00"
 
-
     # Define an associative array for GPU TFLOPS
     declare -A GPU_TFLOPS
 
@@ -139,15 +138,15 @@ data_in=$(jq .)
 # Calculate total cost in USD
 calculate_total_cost_usd "$(jq -r '.resources' <<<"$data_in")"
 
-TARGET_MIN_USD=$(awk "BEGIN {print (($TARGET_MEMORY + $TARGET_EPHEMERAL_STORAGE + $TARGET_CPU))}") #Dynamically calculate - removed /1.25
+TARGET_MIN_USD=$(awk "BEGIN {print (($TARGET_MEMORY + $TARGET_EPHEMERAL_STORAGE + $TARGET_CPU))}")       #Dynamically calculate - removed /1.25
 TARGET_MIN_UAKT=$(awk "BEGIN {print (($TARGET_MIN_USD * 1000000) / ($usd_per_akt * 425940.524781341))}") #Converts the MIN_USD to uakt
 
 total_cost_akt_target=$(awk "BEGIN {print ($total_cost_usd_target/$usd_per_akt)}")
 total_cost_uakt_target=$(awk "BEGIN {print ($total_cost_akt_target*1000000)}")
 cost_per_block=$(awk "BEGIN {print ($total_cost_uakt_target/425940.524781341)}")
 
-if (( $(echo "$cost_per_block < $TARGET_MIN_UAKT" | bc -l) )); then
-  cost_per_block=$TARGET_MIN_UAKT
+if (($(echo "$cost_per_block < $TARGET_MIN_UAKT" | bc -l))); then
+    cost_per_block=$TARGET_MIN_UAKT
 fi
 
 printf "%.4f\n" "$cost_per_block"
