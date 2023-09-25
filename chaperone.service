@@ -1,0 +1,12 @@
+[Unit]
+Description=Chaperone
+After=network.target k3s.service
+
+[Service]
+ExecStart=/usr/bin/python3 /home/akash/chaperone.py --time 30s --delete-namespace
+Restart=always
+User=akash
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
