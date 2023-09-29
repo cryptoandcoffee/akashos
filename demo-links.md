@@ -1,7 +1,5 @@
 Project demo URL (linkout to website/app/pitch deck/whitepaper, etc) 
 
-# End to End Install to Running Provider (Proxmox)
+# Dashboard running mainnet provider
 link coming
 
-# Configure DNS (Cloudflare)
-link coming
