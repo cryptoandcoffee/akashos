@@ -94,17 +94,13 @@ Software Dependencies: ~30 minutes
 - 2Gb Memory 
 - 8Gb Disk
 
-# Installation Instructions
-Default Username : akash
-Default Password : akash
-
 ## Proxmox / VirtualBox / VMware
 
 1. Download Akash OS ISO
 2. Create VM - Attach a disk drive with the ISO
 3. Start the VM
 4. Reboot when install completed and detach the ISO.
-6. Login with default username and password, follow the on-screen instructions.
+6. Login with default username and password "akash", follow the on-screen instructions.
 7. Once the system has rebooted, goto the Control Panel address.
 8. Update the provider attributes with the recommended values and click Save.
 9. Click STOP next to Provider.
@@ -118,7 +114,7 @@ Default Password : akash
 2. Upload the ISO to the datacenter ISO storage location (Vultr/HostHatch/etc) or Attach the ISO to your IPMI Virtual Console Session.
 3. Start the machine with the ISO for the boot drive (F11 may be required)
 4. Reboot when install completed and detach the ISO.
-6. Login with default username and password, follow the on-screen instructions.
+6. Login with default username and password "akash", follow the on-screen instructions.
 7. Once the system has rebooted, goto the Control Panel address.
 8. Update the provider attributes with the recommended values and click Save.
 9. Click STOP next to Provider.
@@ -133,7 +129,7 @@ Default Password : akash
 3. Insert the USB key into the computer you want to make an Akash provider.
 4. Start the machine with the USB key for the boot drive (F11 may be required)
 5. Reboot when install completed and unplug the USB key.
-6. Login with default username and password, follow the on-screen instructions.
+6. Login with default username and password "akash", follow the on-screen instructions.
 7. Once the system has rebooted, goto the Control Panel address.
 8. Update the provider attributes with the recommended values and click Save.
 9. Click STOP next to Provider.
