@@ -3,11 +3,11 @@
 
 Feature Matrix and Status : Y = Working and Tested / T = Testing Phase / N = No Support
 
-| Platform | Basic Provider | GPU | Persistent Storage | IP Leases |
-|----------|----------------|-----|--------------------|-----------|
-| k3s      | Y              | Y   | T                  | T         |
-| microk8s | Y              | T   | T                  | T         |
-| k8s      | Y              | T   | T                  | T         |
+| Platform | Basic Provider | GPU | Persistent Storage | IP Leases | Update Support|
+|----------|----------------|-----|--------------------|-----------|----------------
+| k3s      | Y              | Y   | T                  | T         |Y
+| microk8s | Y              | T   | T                  | T         |T
+| k8s      | Y              | T   | T                  | T         |T
 
 
 AkashOS is an unattended install of Ubuntu Server uses [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/).  AkashOS will automatically create a Kubernetes cluster and configure itself as an Akash provider. 
