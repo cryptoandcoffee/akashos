@@ -1,10 +1,29 @@
-# AkashOS - Akash Provider OS  - Ubuntu Server 22.04 Edition
+# AkashOS: Akash Provider OS - Ubuntu Server 22.04 Edition
 
 ![image](https://github.com/cryptoandcoffee/akashos/assets/19512127/600c9ac4-a030-4391-99ec-18738a228897)
 
-AkashOS is an unattended install of Ubuntu Server uses [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/).  AkashOS will automatically create a Kubernetes cluster and configure itself as an Akash provider. 
+Welcome to AkashOS, a revolutionary approach to becoming a provider on the Akash Network! Utilizing [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/), AkashOS provides an unattended installation of Ubuntu Server and automatically establishes a Kubernetes cluster, configuring itself as an Akash provider.
 
-Download and Attach the latest AkashOS Release ISO to any machine you would like to become a provider on the Akash Network such as Bare-Metal, VPS, or a Virtual Machine.
+## 🌟 Become a Provider with Ease!
+Embark on your journey as a provider with a minimal investment of 25 AKT, valued at $21 at the time of writing. Dive into a world of unlimited earning possibilities within the Akash Network!
+
+- 🧮 **Estimate Your Earnings:** Curious about what your hardware could be earning? Check out [Akash Calculator](https://akashcalcualtor.com)!
+- 📊 **Explore Existing Provider Earnings:** Discover what existing providers are earning in real-time on the Akash Network at [Akash Dash](https://akashdash.com).
+
+## 🛠 Quick & Easy Setup!
+Download and attach the latest AkashOS Release ISO to your chosen hardware: **Bare-Metal, VPS, or Virtual Machine** and watch it transform into a provider on the Akash Network!
+
+## 💡 Why AkashOS?
+- **Streamlined & Automated:** Effortlessly install Ubuntu Server and configure your system with our automated setup!
+- **Infinite Earnings:** Unlock unparalleled earning potential as a provider!
+- **Versatile Application:** Compatible with various setups, ensuring everyone can join!
+
+## 🏆 Let’s Win This Hackathon Together!
+AkashOS is not just a project; it’s a revolution in the decentralized cloud marketplace. Let’s showcase the power of innovation and make AkashOS the winner at the hackathon! 
+
+## 📚 Learn More & Get Involved!
+For additional information or to contribute to this groundbreaking project, please review our [documentation](#) and [contribution guidelines](#). Let’s build the future of decentralized cloud services together!
+
 
 ```
      Akash Provider
