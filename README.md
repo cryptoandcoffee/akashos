@@ -21,30 +21,7 @@ Download and attach the latest AkashOS Release ISO to your chosen hardware: **Ba
 ## 🏆 Let’s Win This Hackathon Together!
 AkashOS is not just a project; it’s a revolution in the decentralized cloud marketplace. Let’s showcase the power of innovation and make AkashOS the winner at the hackathon! 
 
-## 📚 Learn More & Get Involved!
-For additional information or to contribute to this groundbreaking project, please review our [documentation](#) and [contribution guidelines](#). Let’s build the future of decentralized cloud services together!
-
-
-```
-     Akash Provider
-           ||
-     -------------
-    | Helm Charts |
-     -------------
-           ||
-     -------------
-   |  Kubernetes  |
-     -------------
-           ||
-  -----------------------
-|     cloud-init         |
-  -----------------------
-           ||
-     -----------------------
-|  Ubuntu 22.04 AutoInstall |
-  --------------------------
-```
-
+---
 
 Feature Matrix and Status : Y = Working and Tested / T = Testing Phase / N = No Support
 
@@ -53,8 +30,6 @@ Feature Matrix and Status : Y = Working and Tested / T = Testing Phase / N = No 
 | k3s      | Y              | Y   | T                  | T         |Y
 | microk8s | Y              | T   | T                  | T         |T
 | k8s      | Y              | T   | T                  | T         |T
-
-
 
 # Supported Kubernetes installation methods
 
@@ -173,3 +148,24 @@ Todos:
 -Update bid-engine script with latest
 -Add/Remove Attributes from Dashboard and default GPU etc
 
+Stack:
+
+```
+     Akash Provider
+           ||
+     -------------
+    | Helm Charts |
+     -------------
+           ||
+     -------------
+   |  Kubernetes  |
+     -------------
+           ||
+  -----------------------
+|     cloud-init         |
+  -----------------------
+           ||
+     -----------------------
+|  Ubuntu 22.04 AutoInstall |
+  --------------------------
+```
