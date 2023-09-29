@@ -74,18 +74,18 @@ Software Dependencies: ~30 minutes
 3. With great power comes great responsibility. Be aware of the risks and use Lens to monitor your cluster.
 4. If you experience any abuse, ddos, spam, or other issues please report the offending wallet address to the Akash team.
 
-## Software
+## Software Requirements
 1. Domain name (example.com) that you own and can manage DNS records.
 2. 50 AKT to send to new provider wallet
 3. Access to your firewall/router for port forwarding
-4. Lens - we recommend Lens for daily ops
-5. Balena Etcher / Rufus / Ventoy
-6. Dynamic DNS update client and domain for residential IP's
+4. [Lens](https://k8slens.dev/) - Recommend for cluster daily ops - you will need this to easily interact with your new cluster
+5. [Balena Etcher](https://www.balena.io/etcher/), [Rufus](https://rufus.ie/), or [Ventoy](https://www.ventoy.net/en/index.html) for creating bootable USB drives on Linux, Mac, PC.
+6. Dynamic DNS update client and domain for residential IP's. 
 
 ## Hardware Requirements First Node
 
 - 2 CPU / 4 Threads
-- 8Gb Memory 
+- 8Gb Memory
 - 32Gb Disk 
 
 ## Hardware Requirements Additional Nodes
@@ -110,6 +110,7 @@ Default Password : akash
 9. Click STOP next to Provider.
 10. Click Re-Deploy Provider Button.
 11. Send at least 5 AKT to the new wallet address to start the provider.
+12. Click Download Kubeconfig and import into Lens. When first using Lens be sure to set the Namespace to : All or you won't see anything.
 
 ## Bare Metal Datacenter with IPMI/ISO Support
 
@@ -123,6 +124,7 @@ Default Password : akash
 9. Click STOP next to Provider.
 10. Click Re-Deploy Provider Button.
 11. Send at least 5 AKT to the new wallet address to start the provider.
+12. Click Download Kubeconfig and import into Lens. When first using Lens be sure to set the Namespace to : All or you won't see anything.
 
 ## USB Key
 
@@ -137,6 +139,7 @@ Default Password : akash
 9. Click STOP next to Provider.
 10. Click Re-Deploy Provider Button.
 11. Send at least 5 AKT to the new wallet address to start the provider.
+12. Click Download Kubeconfig and import into Lens. When first using Lens be sure to set the Namespace to : All or you won't see anything.
 
 Todos:
 -When changing pricing params, delete the configmap akash-provider-bidscripts from akash-services before re-deploy
