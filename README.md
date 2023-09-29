@@ -12,7 +12,8 @@ Feature Matrix and Status : Y = Working and Tested / T = Testing Phase / N = No 
 
 AkashOS is an unattended install of Ubuntu Server uses [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/).  AkashOS will automatically create a Kubernetes cluster and configure itself as an Akash provider. 
 
-Attach ISO to > Provider Host Machine / VPS / Bare-Metal
+Download and Attach the latest AkashOS Release ISO to any machine you would like to become a provider on the Akash Network such as Bare-Metal, VPS, or a Virtual Machine.
+
 ```
      Akash Provider
            ||
