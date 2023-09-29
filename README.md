@@ -2,7 +2,9 @@
 
 ![image](https://github.com/cryptoandcoffee/akashos/assets/19512127/600c9ac4-a030-4391-99ec-18738a228897)
 
-Welcome to AkashOS, a revolutionary approach to becoming a provider on the Akash Network! Utilizing [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/), AkashOS provides an unattended installation of Ubuntu Server and automatically establishes a Kubernetes cluster, configuring itself as an Akash provider.
+Welcome to AkashOS, an innovative solution designed for those aspiring to become a [provider](https://deploy.cloudmos.io/providers) within the [Akash Network](https://akash.network). By harnessing the capabilities of [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/), AkashOS facilitates a seamless, unattended installation of Ubuntu Server. It not only establishes a Kubernetes cluster autonomously but also deploys Helm charts configuring the system as an Akash Network provider.
+
+Post-installation, users have the flexibility to configure the provider via a user-friendly Dashboard/GUI or through SSH, offering a versatile approach to provider configuration. The installation process has been meticulously refined to be as intuitive as possible for individuals aiming to join the Akash Network as providers. Users are required to answer a few straightforward questions during the installation, and AkashOS takes care of the rest, ensuring a smooth and easy setup experience.
 
 ## 🌟 Become a Provider with Ease!
 Embark on your journey as a provider with a minimal investment of 25 AKT, valued at $21 at the time of writing. Dive into a world of unlimited earning possibilities within the Akash Network!
