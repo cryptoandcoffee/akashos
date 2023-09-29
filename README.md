@@ -1,14 +1,6 @@
 # AkashOS - Akash Provider OS  - Ubuntu Server 22.04 Edition
 
-
-Feature Matrix and Status : Y = Working and Tested / T = Testing Phase / N = No Support
-
-| Platform | Basic Provider | GPU | Persistent Storage | IP Leases | Update Support|
-|----------|----------------|-----|--------------------|-----------|----------------
-| k3s      | Y              | Y   | T                  | T         |Y
-| microk8s | Y              | T   | T                  | T         |T
-| k8s      | Y              | T   | T                  | T         |T
-
+![image](https://github.com/cryptoandcoffee/akashos/assets/19512127/600c9ac4-a030-4391-99ec-18738a228897)
 
 AkashOS is an unattended install of Ubuntu Server uses [Autoinstall](https://ubuntu.com/server/docs/install/autoinstall) and [cloud-init](https://cloudinit.readthedocs.io/en/latest/).  AkashOS will automatically create a Kubernetes cluster and configure itself as an Akash provider. 
 
@@ -33,6 +25,17 @@ Download and Attach the latest AkashOS Release ISO to any machine you would like
 |  Ubuntu 22.04 AutoInstall |
   --------------------------
 ```
+
+
+Feature Matrix and Status : Y = Working and Tested / T = Testing Phase / N = No Support
+
+| Platform | Basic Provider | GPU | Persistent Storage | IP Leases | Update Support|
+|----------|----------------|-----|--------------------|-----------|----------------
+| k3s      | Y              | Y   | T                  | T         |Y
+| microk8s | Y              | T   | T                  | T         |T
+| k8s      | Y              | T   | T                  | T         |T
+
+
 
 # Supported Kubernetes installation methods
 
