@@ -1,4 +1,5 @@
 # AkashOS: Akash Provider OS - Ubuntu Server 22.04 Edition
+## Sister Repository : [AkashOS Dashboard](https://github.com/cryptoandcoffee/akashos-dashboard)
 
 ![image](https://github.com/cryptoandcoffee/akashos/assets/19512127/600c9ac4-a030-4391-99ec-18738a228897)
 
