@@ -1,6 +1,11 @@
 #!/bin/bash
 export KUBECONFIG=/home/akash/.kube/kubeconfig
-. /home/akash/variables
+# Specify the absolute path of the variables file
+variables_file="/home/akash/variables"
+
+# Source the variables file if it exists
+[ -e "$variables_file" ] && . "$variables_file"
+
 #####################################################
 DOMAIN="$DOMAIN"
 ACCOUNT_ADDRESS="$ACCOUNT_ADDRESS"
@@ -81,6 +86,33 @@ helm upgrade --install akash-node akash/akash-node -n akash-services \
 
 kubectl set env statefulset/akash-node-1 AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=100 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY=100 -n akash-services
 
+
+# Run nvidia-smi command to get GPU information
+gpu_info="$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)"
+gpu_models=$(echo "$gpu_info" | awk 'BEGIN {FS = ", "} ; {print $1}' | awk '{print $6 substr($4, 1) tolower(substr($5, 1))}')
+
+# Label nodes with specific GPU models using kubectl
+node_name=$(hostname)
+label_prefix="akash.network/capabilities.gpu.vendor.nvidia.model."
+
+counter=1
+for model in $gpu_models; do
+    label_command="kubectl label node $node_name $label_prefix$model=true"
+    $label_command
+    
+    # Construct the variable entry
+    entry="GPU_$counter=$model"
+    
+    # Check if the entry already exists in the variables file
+    if ! grep -q -e "^$entry$" $variables_file; then
+        # If the entry does not exist, append it to the file
+        echo "$entry" >> $variables_file
+    fi
+    
+    ((counter++))
+done
+
+
 # Run nvidia-smi command to get GPU information
 gpu_info="$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)"
 gpu_models=$(echo "$gpu_info" | awk 'BEGIN {FS = ", "} ; {print $1}' | awk '{print $6 substr($4, 1) tolower(substr($5, 1))}')
@@ -91,6 +123,9 @@ label_prefix="akash.network/capabilities.gpu.vendor.nvidia.model."
 for model in $gpu_models; do
         label_command="kubectl label node $node_name $label_prefix$model=true"
         $label_command
+    # Write each model to the variables file
+    echo "GPU_$counter=$model" >>_file
+    ((counter++))
 done
 
 # Split the original command into two parts: before and after where the new "--set" statements should be inserted
