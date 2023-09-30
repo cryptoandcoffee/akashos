@@ -465,6 +465,8 @@ echo "CPU_PRICE=" >> variables
 echo "MEMORY_PRICE=" >> variables
 echo "DISK_PRICE=" >> variables
 echo "MNEMONIC=\"$MNEMONIC\"" >> variables
+echo 'NODE="http://akash-node-1:26657"' >> variables
+ 
 
 function provider_install(){
 echo "Installing Akash provider and bid-engine"
