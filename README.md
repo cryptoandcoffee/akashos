@@ -25,23 +25,6 @@ Download and attach the latest AkashOS Release ISO to your chosen hardware: **Ba
 ## 🏆 Let’s Win This Hackathon Together!
 AkashOS is not just a project; it’s a revolution in the decentralized cloud marketplace. Let’s showcase the power of innovation and make AkashOS the winner at the hackathon! 
 
----
-
-Feature Matrix and Status : Y = Working and Tested / T = Testing Phase / N = No Support
-
-| Platform | Basic Provider | GPU | Persistent Storage | IP Leases | Update Support|
-|----------|----------------|-----|--------------------|-----------|----------------
-| k3s      | Y              | Y   | T                  | T         |Y
-| microk8s | Y              | T   | T                  | T         |T
-| k8s      | Y              | T   | T                  | T         |T
-
-# Supported Kubernetes installation methods
-
-k3s / microk8s / kubespray
-
-You will be prompted to choose an install path during the first boot.
-The default install path is k3s.
-
 # What is this image best used for?
 
 You can use this image to takeover any x86 machine or virtual machine that you want to configure as a provider on the Akash network
