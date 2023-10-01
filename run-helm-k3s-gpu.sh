@@ -3,10 +3,10 @@ cd /home/akash
 
 export KUBECONFIG=/home/akash/.kube/kubeconfig
 # Specify the absolute path of the variables file
-variables_file="/home/akash/variables"
+variables="/home/akash/variables"
 
 # Source the variables file if it exists
-[ -e "$variables_file" ] && . "$variables_file"
+[ -e "$variables" ] && . "$variables"
 
 helm repo add akash https://akash-network.github.io/helm-charts
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
@@ -91,9 +91,9 @@ for model in $gpu_models; do
     entry="GPU_$counter=$model"
     
     # Check if the entry already exists in the variables file
-    if ! grep -q -e "^$entry$" $variables_file; then
+    if ! grep -q -e "^$entry$" $variables; then
         # If the entry does not exist, append it to the file
-        echo "$entry" >> $variables_file
+        echo "$entry" >> $variables
     fi
     
     ((counter++))
@@ -111,7 +111,7 @@ for model in $gpu_models; do
         label_command="kubectl label node $node_name $label_prefix$model=true"
         $label_command
     # Write each model to the variables file
-    echo "GPU_$counter=$model" >>_file
+    echo "GPU_$counter=$model" >> $variables
     ((counter++))
 done
 
