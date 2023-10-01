@@ -1,11 +1,14 @@
 ##AkashOS Overview
 
 
-https://github.com/cryptoandcoffee/akashos/assets/19512127/6f93515e-68a1-4ea1-805a-b02fcfea4968
 
 
 
 ##AkashOS Download
+
+
+
+https://github.com/cryptoandcoffee/akashos/assets/19512127/8928d06b-0bd9-4d2c-8554-2e5d43bb6d70
 
 
 # Create a provider from scratch in Proxmox
