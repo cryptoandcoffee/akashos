@@ -99,22 +99,6 @@ for model in $gpu_models; do
     ((counter++))
 done
 
-
-# Run nvidia-smi command to get GPU information
-gpu_info="$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)"
-gpu_models=$(echo "$gpu_info" | awk 'BEGIN {FS = ", "} ; {print $1}' | awk '{print $6 substr($4, 1) tolower(substr($5, 1))}')
-# Label nodes with specific GPU models using kubectl
-node_name=$(hostname)
-label_prefix="akash.network/capabilities.gpu.vendor.nvidia.model."
-
-for model in $gpu_models; do
-        label_command="kubectl label node $node_name $label_prefix$model=true"
-        $label_command
-    # Write each model to the variables file
-    echo "GPU_$counter=$model" >> $variables
-    ((counter++))
-done
-
 # Split the original command into two parts: before and after where the new "--set" statements should be inserted
 cmd1="helm upgrade --install akash-provider akash/provider -n akash-services \
         --set attributes[0].key=region --set attributes[0].value=$REGION \
