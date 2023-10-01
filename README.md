@@ -73,7 +73,7 @@ Software Dependencies: ~30 minutes
 
 - 2 CPU / 4 Threads
 - 8Gb Memory
-- 32Gb Disk 
+- 64Gb Disk 
 
 ## Hardware Requirements Additional Nodes
 
