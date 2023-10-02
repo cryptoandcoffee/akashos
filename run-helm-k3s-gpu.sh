@@ -116,18 +116,19 @@ cmd1="helm upgrade --install akash-provider akash/provider -n akash-services \
         --set attributes[12].key=capabilities/storage/2/persistent --set attributes[12].value=true \
         --set attributes[13].key=capabilities/storage/3/class --set attributes[13].value=beta3 \
         --set attributes[14].key=capabilities/storage/3/persistent --set attributes[14].value=true \
-        --set attributes[15].key=ip-lease --set attributes[15].value=true \\"
+        --set attributes[15].key=ip-lease --set attributes[15].value=true"
+
 
 cmd2="--set from=$ACCOUNT_ADDRESS \
-        --set key=\"$(cat /home/akash/key.pem | base64)\" \
-        --set keysecret=\"$(echo $KEY_SECRET | base64)\" \
+        --set key=\"\$(cat /home/akash/key.pem | base64)\" \
+        --set keysecret=\"\$(echo $KEY_SECRET | base64)\" \
         --set domain=$DOMAIN \
-        --set bidpricescript=\"$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)\" \
+        --set bidpricescript=\"\$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)\" \
         --set node=$NODE \
         --set log_restart_patterns=\"rpc node is not catching up|bid failed\" \
         --set resources.limits.cpu=\"1\" \
         --set resources.limits.memory=\"2Gi\" \
-        --set resources.requests.cpu=\"0.5\" \
+        --set resources.requests.cpu=\"0.5\" \ 
         --set resources.requests.memory=\"1Gi\""
 
 # Initialize a variable to hold the new "--set" statements
@@ -140,9 +141,14 @@ index=16
 for var in $(compgen -v); do
     # Check if variable starts with "GPU_"
     if [[ $var == GPU_* ]]; then
-        # Append the new "--set" statements to the new_sets string
-        new_sets+=" --set attributes[$index].key=capabilities/gpu/vendor/nvidia/model/${!var} --set attributes[$index].value=true \\"
-        ((index++)) # Increment the index for the next attribute
+        model=${!var}
+        
+        # Check if model is not "true" to avoid appending additional attributes
+        if [ "$model" != "true" ]; then
+            # Append the new "--set" statements to the new_sets string
+            new_sets+=" --set attributes[$index].key=capabilities/gpu/vendor/nvidia/model/$model --set attributes[$index].value=true "
+            ((index++)) # Increment the index for the next attribute
+        fi
     fi
 done
 
@@ -150,6 +156,8 @@ done
 final_cmd="$cmd1$new_sets$cmd2"
 
 # Execute the final command
+# echo -e $final_cmd > /home/akash/logs/deploy.log
+
 eval $final_cmd
 
     # Provider customizations
