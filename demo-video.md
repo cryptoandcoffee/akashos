@@ -3,6 +3,8 @@
 Explore the demonstration videos to understand the functionalities of AkashOS. 
 The videos should be watched in order.
 
+If you want to watch the entire video download [AkashOS Full Length](https://drive.proton.me/urls/TBRF9PDPYR#RCXzIzd3M1Zf)
+
 ### Download all the videos through our secure [Proton Drive Folder](https://drive.proton.me/urls/JVY5NXDNER#3HAn5wvvK7xq).
 
 ## 1.[AkashOS Overview](https://drive.proton.me/urls/0MPRRG3A5R#7fTvlgNpDaRn)
