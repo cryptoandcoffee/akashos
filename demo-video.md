@@ -24,3 +24,23 @@ Explore the demonstration videos to understand the functionalities of AkashOS. A
 
 ### [Dashboard](https://drive.proton.me/urls/06Y379ZSY8#lLj2rgRNG0Jh)
    - Navigate through the AkashOS dashboard.
+
+### [Host Details and Pricing](https://drive.proton.me/urls/NEC6P9AJF8#6rKZS13awV5A)
+   - Configure the region, cpu, and prices for the provider
+
+### [Fund Wallet](https://drive.proton.me/urls/3TP41KHPZG#HM8sEhhdB4N7)
+   - Fund the new provider wallet
+
+### [Running Provider](https://drive.proton.me/urls/B7X5K19ZF4#4DeXNHrsPPd9)
+   - Verify the Akash provider is running
+
+### [Configure Ports and DNS](https://drive.proton.me/urls/MKNKFG7Q1C#1t6PaSKzT8fF)
+   - Configure the firewall and domain name records
+
+### [Conclusion](https://drive.proton.me/urls/CD728017YC#j5RswZCqsahX)
+   - Wrapping up
+
+
+
+
+
