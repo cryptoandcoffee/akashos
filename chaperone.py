@@ -1,4 +1,5 @@
 from kubernetes import client, config
+import requests
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
@@ -8,9 +9,57 @@ import time
 
 # Initialize a lock for thread-safe tqdm updates
 lock = threading.Lock()
+WELCOME_MESSAGE_SENT = False
 
 def should_skip_namespace(namespace, exclude_namespaces):
     return namespace in exclude_namespaces
+
+def send_discord_message(message, context=None):
+    DISCORD_WEBHOOK_URL = ""
+    if context is not None:
+        message = f"Namespace {context} was deleted due to the following reason: {message}"
+
+    data = {"content": message}
+    response = requests.post(DISCORD_WEBHOOK_URL, data=data)
+
+    if response.status_code == 204:
+        print("Message sent successfully to Discord!")
+    else:
+        print(f"Failed to send message to Discord. Status code: {response.status_code}, Response: {response.text}")
+
+def send_pushover_notification(message, context=None):
+    PUSHOVER_API_URL = "https://api.pushover.net/1/messages.json"
+    API_TOKEN = ""
+    USER_KEY = ""
+    title = "Cluster Protection Alert" if context else "Cluster Protection Startup"
+
+    data = {
+        "token": API_TOKEN,
+        "user": USER_KEY,
+        "title": title,
+        "message": message
+    }
+    response = requests.post(PUSHOVER_API_URL, data=data)
+    if response.status_code == 200:
+        print("Message sent successfully to Pushover!")
+    else:
+        print(f"Failed to send message to Pushover. Status code: {response.status_code}, Response: {response.text}")
+
+def send_startup_message(discord_flag, pushover_flag):
+    global WELCOME_MESSAGE_SENT
+
+    if WELCOME_MESSAGE_SENT:
+        return
+
+    message = "Starting to protect cluster with Provider Chaperone by Crypto and Coffee."
+
+    if discord_flag:
+        send_discord_message(message)
+
+    if pushover_flag:
+        send_pushover_notification(message)
+
+    WELCOME_MESSAGE_SENT = True
 
 def check_keyword_files(namespace, pod_name, keywords, issues):
     command = ["kubectl", "exec", "-n", namespace, pod_name, "--", "find", "/", "-type", "f", "-size", "+1c"]
@@ -67,14 +116,26 @@ def check_pod(pod, exclude_namespaces, common_torrent_clients, common_vpn_socks_
             namespaces_to_delete.add(namespace)
         pbar.update(1)
 
-def delete_namespace(namespace):
+    if local_issues:
+        return (namespace, local_issues)  # Return a tuple containing the namespace and the list of reasons
+
+def delete_namespace(namespace, reasons, discord_flag, pushover_flag):
     try:
         v1.delete_namespace(name=namespace)
         print(f"Deleted namespace: {namespace}")
+        if discord_flag:
+            reason_str = "\n".join(reasons)
+            send_discord_message(reason_str, namespace)
+        if pushover_flag:
+            reason_str = "\n".join(reasons)
+            send_pushover_notification(reason_str, namespace)
     except Exception as e:
         print(f"Failed to delete namespace {namespace}: {e}")
 
 def main(args):
+    # Send startup message if Discord or Pushover are enabled
+    send_startup_message(args.discord, args.pushover)
+
     config.load_kube_config()
     global v1
     v1 = client.CoreV1Api()
@@ -94,19 +155,23 @@ def main(args):
 
     with tqdm(total=len(filtered_pods), desc="Processing Pods") as pbar:
         with ThreadPoolExecutor() as executor:
-            executor.map(lambda pod: check_pod(pod, exclude_namespaces, common_torrent_clients, common_vpn_socks_clients, file_types, keywords, issues, namespaces_to_delete, pbar), filtered_pods)
+            results = list(executor.map(lambda pod: check_pod(pod, exclude_namespaces, common_torrent_clients, common_vpn_socks_clients, file_types, keywords, issues, namespaces_to_delete, pbar), filtered_pods))
 
     print("\nIssues found:")
     for issue in issues:
         print(issue)
 
     if args.delete_namespaces:
-        for namespace in namespaces_to_delete:
-            delete_namespace(namespace)
+        for result in results:
+            if result:  # Check if there's a valid result (not None)
+                namespace, reasons = result
+                delete_namespace(namespace, reasons, args.discord, args.pushover)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Check for issues in Kubernetes pods.')
     parser.add_argument('--delete-namespaces', action='store_true', help='Delete namespaces that have issues.')
+    parser.add_argument('--discord', action='store_true', help='Send notifications to Discord when deleting namespaces.')
+    parser.add_argument('--pushover', action='store_true', help='Send notifications to Pushover when deleting namespaces.')
     parser.add_argument('--time', type=str, default="", help='Run the application for a given time duration. Examples: --1h, --10m, --forever.')
 
     args = parser.parse_args()
