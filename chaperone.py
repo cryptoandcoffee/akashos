@@ -143,8 +143,8 @@ def main(args):
     exclude_namespaces = ["akash-services", "kube-system", "ingress-nginx", "lens-metrics", "rook-ceph", "nvidia-device-plugin"]
     common_torrent_clients = ["honeygain", "qbittorrent", "utorrent", "bittorrent", "deluge", "transmission", "vuze", "frostwire", "tixati", "bitcomet", "bitlord", "ekho", "dperson", "emule", "popcorntime", "headphones", "jackett", "lidarr", "mylar3", "prowlarr", "sickrage"]
     common_vpn_socks_clients = ["webtop", "dvpn", "mullvad", "softether", "openvpn", "wireguard", "nordvpn", "expressvpn", "ipvanish", "cyberghost", "tunnelbear", "vyprvpn", "hotspotshield", "surfshark", "dante", "3proxy", "ss5", "sunssh", "wingate", "ccproxy", "antinat", "srelay", "delegate", "shadowsocks"]
-    file_types = ["torrent", "magnet", "xxx", "par2", "par", "epub", "mobi", "azw", "azw3", "fb2", "lit", "pdb", "cbz", "cbr", "chm", "djvu", "ibooks", "oxps", "xps", "cbr", "cbz"]
-    keywords = ["gore"] #like sex, drugs, gore etc, is very sensitive to test first without --delete-namespaces
+    file_types = ["torrent", "magnet", "xxx", "par2", "par", "epub", "mobi", "azw", "azw3", "fb2", "pdb", "cbz", "cbr", "djvu", "ibooks", "oxps", "xps", "cbr", "cbz"]
+    keywords = ["porn,erotic,xxx"] #like sex, drugs, gore etc, is very sensitive to test first without --delete-namespaces
 
 
     all_pods = v1.list_pod_for_all_namespaces(watch=False).items
