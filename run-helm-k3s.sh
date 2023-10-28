@@ -66,7 +66,7 @@ node_setup() {
       --set resources.requests.memory="4Gi"
 
     # Node customizations
-    kubectl set env statefulset/akash-node-1 AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=100 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY=100 -n akash-services
+    kubectl set env statefulset/akash-node-1 -c akash-node AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=10 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY- -n akash-services
 }
 
 provider_setup() {
@@ -93,6 +93,7 @@ provider_setup() {
 
     # Provider customizations
     kubectl set env statefulset/akash-provider AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=72h -n akash-services
+
 }
 
 
