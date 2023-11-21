@@ -99,66 +99,34 @@ for model in $gpu_models; do
     ((counter++))
 done
 
-# Split the original command into two parts: before and after where the new "--set" statements should be inserted
-cmd1="helm upgrade --install akash-provider akash/provider -n akash-services \
-        --set attributes[0].key=region --set attributes[0].value=$REGION \
-        --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
-        --set attributes[2].key=host --set attributes[2].value=$HOST \
-        --set attributes[3].key=cpu --set attributes[3].value=$CPU \
-        --set attributes[4].key=tier --set attributes[4].value=$TIER \
-        --set attributes[5].key=organization --set attributes[5].value=$ORG \
-        --set attributes[6].key=network_download --set attributes[6].value=$DOWNLOAD \
-        --set attributes[7].key=network_upload --set attributes[7].value=$UPLOAD \
-        --set attributes[8].key=status --set attributes[8].value=https://status.$DOMAIN \
-        --set attributes[9].key=capabilities/storage/1/class --set attributes[9].value=beta1 \
-        --set attributes[10].key=capabilities/storage/1/persistent --set attributes[10].value=true \
-        --set attributes[11].key=capabilities/storage/2/class --set attributes[11].value=beta2 \
-        --set attributes[12].key=capabilities/storage/2/persistent --set attributes[12].value=true \
-        --set attributes[13].key=capabilities/storage/3/class --set attributes[13].value=beta3 \
-        --set attributes[14].key=capabilities/storage/3/persistent --set attributes[14].value=true \
-        --set attributes[15].key=ip-lease --set attributes[15].value=true"
-
-
-cmd2="--set from=$ACCOUNT_ADDRESS \
-        --set key=\"\$(cat /home/akash/key.pem | base64)\" \
-        --set keysecret=\"\$(echo $KEY_SECRET | base64)\" \
-        --set domain=$DOMAIN \
-        --set bidpricescript=\"\$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)\" \
-        --set node=$NODE \
-        --set log_restart_patterns=\"rpc node is not catching up|bid failed\" \
-        --set resources.limits.cpu=\"1\" \
-        --set resources.limits.memory=\"2Gi\" \
-        --set resources.requests.cpu=\"0.5\" \ 
-        --set resources.requests.memory=\"1Gi\""
-
-# Initialize a variable to hold the new "--set" statements
-new_sets=""
-
-# Start index for the new attributes
-index=16
-
-# Loop through each variable in the environment
-for var in $(compgen -v); do
-    # Check if variable starts with "GPU_"
-    if [[ $var == GPU_* ]]; then
-        model=${!var}
-        
-        # Check if model is not "true" to avoid appending additional attributes
-        if [ "$model" != "true" ]; then
-            # Append the new "--set" statements to the new_sets string
-            new_sets+=" --set attributes[$index].key=capabilities/gpu/vendor/nvidia/model/$model --set attributes[$index].value=true "
-            ((index++)) # Increment the index for the next attribute
-        fi
-    fi
-done
-
-# Concatenate cmd1, new_sets, and cmd2 to form the final command
-final_cmd="$cmd1$new_sets$cmd2"
-
-# Execute the final command
-# echo -e $final_cmd > /home/akash/logs/deploy.log
-
-eval $final_cmd
+    helm upgrade --install akash-provider akash/provider -n akash-services \
+             --set attributes[0].key=region --set attributes[0].value=$REGION \
+             --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
+             --set attributes[2].key=host --set attributes[2].value=$HOST \
+             --set attributes[3].key=cpu --set attributes[3].value=$CPU \
+             --set attributes[4].key=tier --set attributes[4].value=$TIER \
+             --set attributes[5].key=network_download --set attributes[5].value=$DOWNLOAD \
+             --set attributes[6].key=network_upload --set attributes[6].value=$UPLOAD \
+             --set attributes[7].key=status --set attributes[7].value=https://status.$DOMAIN \
+             --set attributes[8].key=capabilities/storage/1/class --set attributes[8].value=beta1 \
+             --set attributes[9].key=capabilities/storage/1/persistent --set attributes[9].value=true \
+             --set attributes[10].key=capabilities/storage/2/class --set attributes[10].value=beta2 \
+             --set attributes[11].key=capabilities/storage/2/persistent --set attributes[11].value=true \
+             --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=beta3 \
+             --set attributes[13].key=capabilities/storage/3/persistent --set attributes[13].value=true \
+             --set attributes[14].key=capabilities/gpu/vendor/nvidia/model/$GPU_1 --set attributes[14].value=true \
+             --set chainid=$CHAIN_ID \
+             --set from=$ACCOUNT_ADDRESS \
+             --set key="$(cat /home/akash/key.pem | base64)" \
+             --set keysecret="$(echo $KEY_SECRET | base64)" \
+             --set domain=$DOMAIN \
+             --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
+             --set node=$NODE \
+             --set log_restart_patterns="rpc node is not catching up|bid failed" \
+             --set resources.limits.cpu="2" \
+             --set resources.limits.memory="2Gi" \
+             --set resources.requests.cpu="0.5" \
+             --set resources.requests.memory="1Gi"
 
     # Provider customizations
     kubectl set env statefulset/akash-provider AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=72h -n akash-services
