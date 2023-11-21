@@ -64,7 +64,7 @@ node_setup() {
       --set akash_node.minimum_gas_prices=0uakt \
       --set state_sync.enabled=true \
       --set akash_node.snapshot_provider=polkachu \
-      --set resources.limits.cpu="2" \
+      --set resources.limits.cpu="4" \
       --set resources.limits.memory="8Gi" \
       --set resources.requests.cpu="0.5" \
       --set resources.requests.memory="4Gi"
@@ -123,7 +123,7 @@ done
              --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
              --set node=$NODE \
              --set log_restart_patterns="rpc node is not catching up|bid failed" \
-             --set resources.limits.cpu="2" \
+             --set resources.limits.cpu="1" \
              --set resources.limits.memory="2Gi" \
              --set resources.requests.cpu="0.5" \
              --set resources.requests.memory="1Gi"
