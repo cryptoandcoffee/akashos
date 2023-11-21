@@ -460,6 +460,7 @@ echo "DOMAIN=$DOMAIN_" > variables
 echo "ACCOUNT_ADDRESS=$ACCOUNT_ADDRESS_" >> variables
 echo "KEY_SECRET=$KEY_SECRET_" >> variables
 echo "CHAIN_ID=akashnet-2" >> variables
+echo "HOST=akash" >> variables
 echo "REGION=$REGION_" >> variables
 echo "CPU=$CPU_" >> variables
 echo "UPLOAD=$UPLOAD_" >> variables
