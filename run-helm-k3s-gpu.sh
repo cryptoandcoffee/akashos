@@ -62,8 +62,8 @@ node_setup() {
     helm upgrade --install akash-node akash/akash-node -n akash-services \
       --set akash_node.api_enable=true \
       --set akash_node.minimum_gas_prices=0uakt \
-      --set state_sync.enabled=false \
-      --set akash_node.snapshot_provider=autostake \
+      --set state_sync.enabled=true \
+      --set akash_node.snapshot_provider=polkachu \
       --set resources.limits.cpu="2" \
       --set resources.limits.memory="8Gi" \
       --set resources.requests.cpu="0.5" \
