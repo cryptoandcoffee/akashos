@@ -52,6 +52,10 @@ EOF
     helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
       --namespace ingress-nginx --create-namespace \
       -f ingress-nginx-custom.yaml
+
+kubectl label ns ingress-nginx app.kubernetes.io/name=ingress-nginx app.kubernetes.io/instance=ingress-nginx
+kubectl label ingressclass akash-ingress-class akash.network=true
+
 }
 
 node_setup() {
