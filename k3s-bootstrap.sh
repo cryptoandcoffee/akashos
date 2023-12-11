@@ -300,7 +300,10 @@ if [[ $CLIENT_NODE_ == "false" ]]; then
 
 function k3sup_install(){
 curl -LS https://get.k3sup.dev | sh
-LOCAL_IP=$(ip -4 addr show | grep enp* | grep -oP 'inet \K[\d.]+')
+#OLD WAY
+#LOCAL_IP=$(ip -4 addr show | grep enp* | grep -oP 'inet \K[\d.]+')
+#New way compatible with VPS
+LOCAL_IP=$(ip addr show | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | cut -d/ -f1)
 echo 'akash ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
 apt-get install -y sshpass
 sudo -u akash sshpass -p 'akash' ssh-copy-id -i /home/akash/.ssh/id_rsa.pub -o StrictHostKeyChecking=no akash@$LOCAL_IP
