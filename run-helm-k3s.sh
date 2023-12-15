@@ -62,15 +62,15 @@ node_setup() {
     helm upgrade --install akash-node akash/akash-node -n akash-services \
       --set akash_node.api_enable=true \
       --set akash_node.minimum_gas_prices=0uakt \
-      --set state_sync.enabled=false \
-      --set akash_node.snapshot_provider=autostake \
-      --set resources.limits.cpu="2" \
+      --set state_sync.enabled=true \
+      --set akash_node.snapshot_provider=polkachu \
+      --set resources.limits.cpu="4" \
       --set resources.limits.memory="8Gi" \
       --set resources.requests.cpu="0.5" \
       --set resources.requests.memory="4Gi"
 
     # Node customizations
-    kubectl set env statefulset/akash-node-1 -c akash-node AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=10 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY- -n akash-services
+    kubectl set env statefulset/akash-node-1 AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=10 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY=0 -n akash-services
 }
 
 provider_setup() {
@@ -83,6 +83,12 @@ provider_setup() {
         --set attributes[5].key=network_download --set attributes[5].value=$DOWNLOAD \
         --set attributes[6].key=network_upload --set attributes[6].value=$UPLOAD \
         --set attributes[7].key=status --set attributes[7].value=https://status.$DOMAIN \
+        --set attributes[8].key=capabilities/storage/1/class --set attributes[8].value=beta1 \
+        --set attributes[9].key=capabilities/storage/1/persistent --set attributes[9].value=true \
+        --set attributes[10].key=capabilities/storage/2/class --set attributes[10].value=beta2 \
+        --set attributes[11].key=capabilities/storage/2/persistent --set attributes[11].value=true \
+        --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=beta3 \
+        --set attributes[13].key=capabilities/storage/3/persistent --set attributes[13].value=true \
         --set from=$ACCOUNT_ADDRESS \
         --set key="$(cat /home/akash/key.pem | base64)" \
         --set keysecret="$(echo $KEY_SECRET | base64)" \
