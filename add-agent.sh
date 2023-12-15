@@ -37,9 +37,9 @@ for hostname in "${!nodes[@]}"; do
     echo "Key already exists on $hostname ($ip). Skipping..."
   fi
 
-  function join-agent(){
+  function join_agent(){
     k3sup join --user root --ip $ip --server-ip $AKASH_NODE1_IP --server-user akash
   }
-  join-agent
+  join_agent
 
 done
