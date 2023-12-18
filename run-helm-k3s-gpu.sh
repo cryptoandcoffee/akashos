@@ -133,7 +133,7 @@ done
              --set resources.requests.memory="1Gi"
 
     # Provider customizations
-    kubectl set env statefulset/akash-provider AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=72h -n akash-services
+    kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.028uakt AKASH_GAS_ADJUSTMENT=1.42 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=6h -n akash-services
 }
 
 hostname_operator() {
