@@ -132,6 +132,34 @@ def delete_namespace(namespace, reasons, discord_flag, pushover_flag):
     except Exception as e:
         print(f"Failed to delete namespace {namespace}: {e}")
 
+def check_evicted_pods(v1, discord_flag, pushover_flag):
+    try:
+        all_pods = v1.list_pod_for_all_namespaces(watch=False).items
+        for pod in all_pods:
+            namespace = pod.metadata.namespace
+            pod_name = pod.metadata.name
+            pod_status = pod.status.phase
+
+            if pod_status == "Evicted":
+                message = f"Pod {pod_name} in namespace {namespace} has been evicted and will be forcefully deleted."
+                print(message)
+
+                if discord_flag:
+                    send_discord_message(message, context=namespace)
+
+                if pushover_flag:
+                    send_pushover_notification(message, context=namespace)
+
+                # Force delete the evicted pod
+                try:
+                    v1.delete_namespaced_pod(name=pod_name, namespace=namespace, grace_period_seconds=0)
+                    print(f"Forcefully deleted pod: {pod_name} in namespace {namespace}")
+                except Exception as e:
+                    print(f"Failed to forcefully delete pod {pod_name} in namespace {namespace}: {e}")
+
+    except Exception as e:
+        print(f"Failed to check evicted pods: {e}")
+
 def main(args):
     # Send startup message if Discord or Pushover are enabled
     send_startup_message(args.discord, args.pushover)
@@ -146,7 +174,6 @@ def main(args):
     file_types = ["torrent", "magnet", "xxx", "par2", "par", "epub", "mobi", "azw", "azw3", "fb2", "pdb", "cbz", "cbr", "ibooks", "oxps", "xps", "cbr", "cbz"]
     keywords = ["porn,erotic,xxx"] #like sex, drugs, gore etc, is very sensitive to test first without --delete-namespaces
 
-
     all_pods = v1.list_pod_for_all_namespaces(watch=False).items
     filtered_pods = [pod for pod in all_pods if not should_skip_namespace(pod.metadata.namespace, exclude_namespaces)]
 
@@ -156,6 +183,9 @@ def main(args):
     with tqdm(total=len(filtered_pods), desc="Processing Pods") as pbar:
         with ThreadPoolExecutor() as executor:
             results = list(executor.map(lambda pod: check_pod(pod, exclude_namespaces, common_torrent_clients, common_vpn_socks_clients, file_types, keywords, issues, namespaces_to_delete, pbar), filtered_pods))
+
+    if args.evicted:
+        check_evicted_pods(v1, namespaces_to_delete, args.discord, args.pushover)
 
     print("\nIssues found:")
     for issue in issues:
@@ -173,6 +203,7 @@ if __name__ == "__main__":
     parser.add_argument('--discord', action='store_true', help='Send notifications to Discord when deleting namespaces.')
     parser.add_argument('--pushover', action='store_true', help='Send notifications to Pushover when deleting namespaces.')
     parser.add_argument('--time', type=str, default="", help='Run the application for a given time duration. Examples: --1h, --10m, --forever.')
+    parser.add_argument('--evicted', action='store_true', help='Check for and report evicted pods.')
 
     args = parser.parse_args()
 
