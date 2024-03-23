@@ -12,6 +12,7 @@ helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
 helm repo update
 
 
+
 setup_environment() {
     # Kubernetes config
     kubectl create ns akash-services
@@ -19,6 +20,16 @@ setup_environment() {
     kubectl create ns lease
     kubectl label ns lease akash.network=true
     kubectl apply -f https://raw.githubusercontent.com/akash-network/provider/main/pkg/apis/akash.network/crd.yaml
+}
+
+ip_leases(){
+#IP leases
+kubectl create ns metallb-system
+helm repo add metallb https://metallb.github.io/metallb
+helm upgrade --install metallb metallb/metallb --version 0.13.11 -n metallb-system --wait
+kubectl -n metallb-system expose deployment metallb-controller --name=controller --overrides='{"spec":{"ports":[{"protocol":"TCP","name":"monitoring","port":7472}]}}'
+helm upgrade --install akash-ip-operator akash/akash-ip-operator --version 8.0.0 -n akash-services --set provider_address=$ACCOUNT_ADDRESS --wait
+kubectl apply -f metal-lb.yml
 }
 
 
@@ -59,7 +70,7 @@ kubectl label ingressclass akash-ingress-class akash.network=true
 }
 
 node_setup() {
-    helm upgrade --install akash-node akash/akash-node -n akash-services \
+    helm upgrade --install akash-node akash/akash-node -n akash-services --wait \
       --set akash_node.api_enable=true \
       --set akash_node.minimum_gas_prices=0uakt \
       --set state_sync.enabled=true \
@@ -74,7 +85,7 @@ node_setup() {
 }
 
 provider_setup() {
-    helm upgrade --install akash-provider akash/provider -n akash-services \
+    helm upgrade --install akash-provider akash/provider -n akash-services --wait \
         --set attributes[0].key=region --set attributes[0].value=$REGION \
         --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
         --set attributes[2].key=host --set attributes[2].value=$HOST \
@@ -94,6 +105,7 @@ provider_setup() {
         --set keysecret="$(echo $KEY_SECRET | base64)" \
         --set domain=$DOMAIN \
         --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
+        --set ipoperator=false
         --set node=$NODE \
         --set log_restart_patterns="rpc node is not catching up|bid failed" \
         --set resources.limits.cpu="1" \
@@ -101,18 +113,26 @@ provider_setup() {
         --set resources.requests.cpu="0.5" \
         --set resources.requests.memory="1Gi"
 
-    # Provider customizations
-    kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.028uakt AKASH_GAS_ADJUSTMENT=1.42 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=6h -n akash-services
+kubectl scale statefulset akash-provider --replicas=0 -n akash-services
 
+    # Provider customizations
+    kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.025uakt AKASH_GAS_ADJUSTMENT=1.65 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=24h -n akash-services
+
+    kubectl patch configmap akash-provider-scripts \
+      --namespace akash-services \
+      --type json \
+      --patch='[{"op": "add", "path": "/data/liveness_checks.sh", "value":"#!/bin/bash\necho \"Liveness check bypassed\""}]'
+
+kubectl scale statefulset akash-provider --replicas=1 -n akash-services
 }
 
 
 hostname_operator() {
-    helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services
+    helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services --version 8.0.0 --wait
 }
 
 inventory_operator() {
-    helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services
+    helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services --version 8.0.0 --wait
 }
 
 persistent_storage() {
