@@ -81,8 +81,17 @@ node_setup() {
       --set resources.requests.cpu="1" \
       --set resources.requests.memory="4Gi"
 
-    # Node customizations
-    kubectl set env statefulset/akash-node-1 AKASH_PRUNING=custom AKASH_PRUNING_INTERVAL=10 AKASH_PRUNING_KEEP_RECENT=100 AKASH_PRUNING_KEEP_EVERY=0 -n akash-services
+    kubectl set env statefulset/akash-node-1 \
+    AKASH_PRUNING=custom \
+    AKASH_PRUNING_KEEP_EVERY=0 \
+    AKASH_PRUNING_KEEP_RECENT=2000 \
+    AKASH_PRUNING_INTERVAL=2000 \
+    AKASH_SNAPSHOT_INTERVAL=0 \
+    AKASH_SNAPSHOT_KEEP_RECENT=0 \
+    -n akash-services
+    
+    kubectl rollout restart statefulset/akash-node-1 -n akash-services
+    
 }
 
 provider_setup() {
@@ -114,8 +123,6 @@ provider_setup() {
         --set resources.requests.cpu="1" \
         --set resources.requests.memory="1Gi"
 
-kubectl scale statefulset akash-provider --replicas=0 -n akash-services
-
     # Provider customizations
     kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.025uakt AKASH_GAS_ADJUSTMENT=1.75 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=24h -n akash-services
 
@@ -124,7 +131,7 @@ kubectl scale statefulset akash-provider --replicas=0 -n akash-services
       --type json \
       --patch='[{"op": "add", "path": "/data/liveness_checks.sh", "value":"#!/bin/bash\necho \"Liveness check bypassed\""}]'
 
-kubectl scale statefulset akash-provider --replicas=1 -n akash-services
+    kubectl rollout restart statefulset/akash-provider -n akash-services
 }
 
 
