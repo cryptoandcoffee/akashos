@@ -71,7 +71,7 @@ kubectl label ingressclass akash-ingress-class akash.network=true
 }
 
 node_setup() {
-    helm upgrade --install akash-node akash/akash-node -n akash-services --wait \
+    helm upgrade --install akash-node akash/akash-node -n akash-services \
       --set akash_node.api_enable=true \
       --set akash_node.minimum_gas_prices=0uakt \
       --set state_sync.enabled=true \
@@ -86,7 +86,7 @@ node_setup() {
 }
 
 provider_setup() {
-    helm upgrade --install akash-provider akash/provider -n akash-services --wait \
+    helm upgrade --install akash-provider akash/provider -n akash-services \
         --set attributes[0].key=region --set attributes[0].value=$REGION \
         --set attributes[1].key=chia-plotting --set attributes[1].value=$CHIA_PLOTTING \
         --set attributes[2].key=host --set attributes[2].value=$HOST \
@@ -129,11 +129,11 @@ kubectl scale statefulset akash-provider --replicas=1 -n akash-services
 
 
 hostname_operator() {
-    helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services --wait
+    helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services
 }
 
 inventory_operator() {
-    helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services --wait
+    helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services
 }
 
 persistent_storage() {
