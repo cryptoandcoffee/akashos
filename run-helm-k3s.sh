@@ -26,7 +26,7 @@ ip_leases(){
 #IP leases
 kubectl create ns metallb-system
 helm repo add metallb https://metallb.github.io/metallb
-helm upgrade --install metallb metallb/metallb --version 0.14.3 -n metallb-system --wait
+helm upgrade --install metallb metallb/metallb -n metallb-system --wait
 kubectl -n metallb-system expose deployment metallb-controller --name=controller --overrides='{"spec":{"ports":[{"protocol":"TCP","name":"monitoring","port":7472}]}}'
 helm upgrade --install akash-ip-operator akash/akash-ip-operator --version 8.0.0 -n akash-services --set provider_address=$ACCOUNT_ADDRESS --wait
 kubectl apply -f metal-lb.yml
@@ -54,8 +54,9 @@ controller:
   extraArgs:
     enable-ssl-passthrough: true
 tcp:
-  "1317": "akash-services/akash-node-1:1317"
   "8443": "akash-services/akash-provider:8443"
+  "8444": "akash-services/akash-provider:8444"
+  "1317": "akash-services/akash-node-1:1317"
   "9090":  "akash-services/akash-node-1:9090"
   "26656": "akash-services/akash-node-1:26656"
   "26657": "akash-services/akash-node-1:26657"
@@ -75,9 +76,9 @@ node_setup() {
       --set akash_node.minimum_gas_prices=0uakt \
       --set state_sync.enabled=true \
       --set akash_node.snapshot_provider=polkachu \
-      --set resources.limits.cpu="4" \
+      --set resources.limits.cpu="2" \
       --set resources.limits.memory="8Gi" \
-      --set resources.requests.cpu="0.5" \
+      --set resources.requests.cpu="1" \
       --set resources.requests.memory="4Gi"
 
     # Node customizations
@@ -105,18 +106,18 @@ provider_setup() {
         --set keysecret="$(echo $KEY_SECRET | base64)" \
         --set domain=$DOMAIN \
         --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
-        --set ipoperator=false
+        --set ipoperator=false \
         --set node=$NODE \
         --set log_restart_patterns="rpc node is not catching up|bid failed" \
-        --set resources.limits.cpu="1" \
+        --set resources.limits.cpu="2" \
         --set resources.limits.memory="2Gi" \
-        --set resources.requests.cpu="0.5" \
+        --set resources.requests.cpu="1" \
         --set resources.requests.memory="1Gi"
 
 kubectl scale statefulset akash-provider --replicas=0 -n akash-services
 
     # Provider customizations
-    kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.025uakt AKASH_GAS_ADJUSTMENT=1.65 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=24h -n akash-services
+    kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.025uakt AKASH_GAS_ADJUSTMENT=1.75 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=24h -n akash-services
 
     kubectl patch configmap akash-provider-scripts \
       --namespace akash-services \
