@@ -513,7 +513,7 @@ wget -q https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/run-helm-
 wget -q https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/bid-engine-script.sh
 chmod +x run-helm-k3s.sh ; chmod +x bid-engine-script.sh
 chown akash:akash *.sh
-./run-helm-k3s.sh 
+sudo -u akash ./run-helm-k3s.sh 
 fi
 }
 
