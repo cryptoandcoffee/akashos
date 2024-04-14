@@ -57,26 +57,46 @@ if [[ $CLIENT_NODE_ == true ]]; then
 fi
 
 if [[ $CLIENT_NODE_ == true ]]; then
-    while true; do
-        clear
-        read -p "What is the IP address of akash-node1? : " AKASH_NODE_1_IP_
-        
-        read -p "Are you sure the IP address of akash-node1 is correct? ($AKASH_NODE_1_IP_) (y/n): " choice
-        
-        case "$choice" in
-            y|Y ) 
-                break
-                ;;
-            n|N ) 
-                echo "Please try again."
-                sleep 2
-                ;;
-            * ) 
-                echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-                sleep 2
-                ;;
-        esac
-    done
+    read -p "Do you want to attempt to automatically join the client node to the server node? (y/n): " choice
+    if [[ "$choice" =~ ^[yY]$ ]]; then
+        while true; do
+            read -p "What is the IP address of akash-node1? : " AKASH_NODE_1_IP
+            
+            read -p "Are you sure the IP address of akash-node1 is correct? (Current: $AKASH_NODE_1_IP) (y/n): " confirm
+            case "$confirm" in
+                [yY] )
+                    while true; do
+                        read -p "Should this node be a control plane or an agent? (c/a): " node_type
+                        case "$node_type" in
+                            [cC] )
+                                NODE_TYPE="control_plane"
+                                break
+                                ;;
+                            [aA] )
+                                NODE_TYPE="agent"
+                                break
+                                ;;
+                            * )
+                                echo "Invalid entry. Please enter 'c' for control plane or 'a' for agent."
+                                sleep 2
+                                ;;
+                        esac
+                    done
+                    break
+                    ;;
+                [nN] )
+                    echo "Please try again."
+                    sleep 2
+                    ;;
+                * )
+                    echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
+                    sleep 2
+                    ;;
+            esac
+        done
+    else
+        echo "Continuing without automatically joining the client node to the server node."
+    fi
 fi
 
 if [[ $CLIENT_NODE_ == "false" ]]; then
