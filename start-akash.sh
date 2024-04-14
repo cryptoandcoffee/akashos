@@ -98,7 +98,7 @@ while true; do
 done
 
   
-  ./run-helm-k3s.sh
+  sudo -u akash ./run-helm-k3s.sh
   configure_gpu
   create_test_pod
 fi
