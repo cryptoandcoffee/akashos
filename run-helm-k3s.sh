@@ -26,7 +26,7 @@ ip_leases(){
 #IP leases
 kubectl create ns metallb-system
 helm repo add metallb https://metallb.github.io/metallb
-helm upgrade --install metallb metallb/metallb --version 0.13.11 -n metallb-system --wait
+helm upgrade --install metallb metallb/metallb --version 0.14.3 -n metallb-system --wait
 kubectl -n metallb-system expose deployment metallb-controller --name=controller --overrides='{"spec":{"ports":[{"protocol":"TCP","name":"monitoring","port":7472}]}}'
 helm upgrade --install akash-ip-operator akash/akash-ip-operator --version 8.0.0 -n akash-services --set provider_address=$ACCOUNT_ADDRESS --wait
 kubectl apply -f metal-lb.yml
