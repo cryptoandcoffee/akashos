@@ -28,7 +28,7 @@ kubectl create ns metallb-system
 helm repo add metallb https://metallb.github.io/metallb
 helm upgrade --install metallb metallb/metallb -n metallb-system --wait
 kubectl -n metallb-system expose deployment metallb-controller --name=controller --overrides='{"spec":{"ports":[{"protocol":"TCP","name":"monitoring","port":7472}]}}'
-helm upgrade --install akash-ip-operator akash/akash-ip-operator --version 8.0.0 -n akash-services --set provider_address=$ACCOUNT_ADDRESS --wait
+helm upgrade --install akash-ip-operator akash/akash-ip-operator -n akash-services --set provider_address=$ACCOUNT_ADDRESS --wait
 kubectl apply -f metal-lb.yml
 }
 
@@ -129,11 +129,11 @@ kubectl scale statefulset akash-provider --replicas=1 -n akash-services
 
 
 hostname_operator() {
-    helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services --version 8.0.0 --wait
+    helm upgrade --install akash-hostname-operator akash/akash-hostname-operator -n akash-services --wait
 }
 
 inventory_operator() {
-    helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services --version 8.0.0 --wait
+    helm upgrade --install inventory-operator akash/akash-inventory-operator -n akash-services --wait
 }
 
 persistent_storage() {
