@@ -81,12 +81,21 @@ node_setup() {
       --set resources.requests.cpu="2" \
       --set resources.requests.memory="4Gi"
 
+    #Get from Cosmos Chain Registry
+    PERSISTENT_PEERS=$(curl -s https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/chain.json | jq -r '.peers.seeds[] | "\(.id)@\(.address)"' | paste -sd,)
+    #Get from Running Node
+    LIVE_PEERS=$(curl -s https://akash-rpc.polkachu.com/net_info | jq -r '.result.peers[] | "\(.node_info.id)@\(.node_info.listen_addr)"' | grep -v "tcp" | paste -sd,)
+
     kubectl set env statefulset/akash-node-1 -n akash-services \
       AKASH_PRUNING=custom \
       AKASH_PRUNING_INTERVAL=10 \
       AKASH_PRUNING_KEEP_RECENT=100 \
       AKASH_PRUNING_KEEP_EVERY=0 \
-      AKASH_P2P_PERSISTENT_PEERS=$(curl -s https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/chain.json | jq -r '.peers.seeds[] | "\(.id)@\(.address)"' | paste -sd,)
+      AKASH_P2P_PERSISTENT_PEERS="$PERSISTENT_PEERS,$LIVE_PEERS"
+
+      #AKASH_P2P_MAX_NUM_INBOUND_PEERS=100 \
+      #AKASH_P2P_MAX_NUM_OUTBOUND_PEERS=100 \
+      #AKASH_P2P_MAX_DIAL_ATTEMPTS=3 \
 
     kubectl rollout restart statefulset/akash-node-1 -n akash-services
 }
