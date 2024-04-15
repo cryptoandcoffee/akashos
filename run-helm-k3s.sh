@@ -71,7 +71,6 @@ kubectl label ingressclass akash-ingress-class akash.network=true
 }
 
 node_setup() {
-
     helm upgrade --install akash-node akash/akash-node -n akash-services \
       --set akash_node.api_enable=true \
       --set akash_node.minimum_gas_prices=0uakt \
@@ -87,13 +86,9 @@ node_setup() {
       AKASH_PRUNING_INTERVAL=10 \
       AKASH_PRUNING_KEEP_RECENT=100 \
       AKASH_PRUNING_KEEP_EVERY=0 \
-      AKASH_P2P_MAX_NUM_INBOUND_PEERS=100 \
-      AKASH_P2P_MAX_NUM_OUTBOUND_PEERS=100 \
-      AKASH_P2P_MAX_DIAL_ATTEMPTS=3 \
       AKASH_P2P_PERSISTENT_PEERS=$(curl -s https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/chain.json | jq -r '.peers.seeds[] | "\(.id)@\(.address)"' | paste -sd,)
 
     kubectl rollout restart statefulset/akash-node-1 -n akash-services
-
 }
 
 provider_setup() {
