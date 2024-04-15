@@ -328,7 +328,7 @@ echo 'akash ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
 apt-get install -y sshpass
 sudo -u akash sshpass -p 'akash' ssh-copy-id -i /home/akash/.ssh/id_rsa.pub -o StrictHostKeyChecking=no akash@$LOCAL_IP
 sudo -u akash sshpass -p 'akash' ssh-copy-id -i /home/akash/.ssh/id_rsa.pub -o StrictHostKeyChecking=no akash@127.0.0.1
-sudo -u akash k3sup install --cluster --user akash --local --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable-network-policy --flannel-backend=none"
+sudo -u akash k3sup install --cluster --user akash --ip $LOCAL_IP --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable-network-policy --flannel-backend=none"
 ##Add additional server nodes with:
 #k3sup join --server --server-ip 192.168.1.199 --server-user akash --user akash --ip 192.168.1.132 --k3s-extra-args "--disable servicelb --disable traefik --disable metrics-server --disable-network-policy --flannel-backend=none"
 
