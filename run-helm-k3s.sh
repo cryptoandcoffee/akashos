@@ -71,27 +71,29 @@ kubectl label ingressclass akash-ingress-class akash.network=true
 }
 
 node_setup() {
+
     helm upgrade --install akash-node akash/akash-node -n akash-services \
       --set akash_node.api_enable=true \
       --set akash_node.minimum_gas_prices=0uakt \
-      --set state_sync.enabled=false \
       --set akash_node.snapshot_provider=polkachu \
+      --set state_sync.enabled=false \
       --set resources.limits.cpu="2" \
       --set resources.limits.memory="8Gi" \
-      --set resources.requests.cpu="1" \
+      --set resources.requests.cpu="2" \
       --set resources.requests.memory="4Gi"
 
-    kubectl set env statefulset/akash-node-1 \
-    AKASH_PRUNING=custom \
-    AKASH_PRUNING_KEEP_EVERY=0 \
-    AKASH_PRUNING_KEEP_RECENT=2000 \
-    AKASH_PRUNING_INTERVAL=2000 \
-    AKASH_SNAPSHOT_INTERVAL=0 \
-    AKASH_SNAPSHOT_KEEP_RECENT=0 \
-    -n akash-services
-    
+    kubectl set env statefulset/akash-node-1 -n akash-services \
+      AKASH_PRUNING=custom \
+      AKASH_PRUNING_INTERVAL=10 \
+      AKASH_PRUNING_KEEP_RECENT=100 \
+      AKASH_PRUNING_KEEP_EVERY=0 \
+      AKASH_P2P_MAX_NUM_INBOUND_PEERS=100 \
+      AKASH_P2P_MAX_NUM_OUTBOUND_PEERS=100 \
+      AKASH_P2P_MAX_DIAL_ATTEMPTS=3 \
+      AKASH_P2P_PERSISTENT_PEERS=$(curl -s https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/chain.json | jq -r '.peers.seeds[] | "\(.id)@\(.address)"' | paste -sd,)
+
     kubectl rollout restart statefulset/akash-node-1 -n akash-services
-    
+
 }
 
 provider_setup() {
