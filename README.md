@@ -22,12 +22,9 @@ Download and attach the latest AkashOS Release ISO to your chosen hardware: **Ba
 - **Infinite Earnings:** Unlock unparalleled earning potential as a provider!
 - **Versatile Application:** Compatible with various setups, ensuring everyone can join!
 
-## 🏆 Let’s Win This Hackathon Together!
-AkashOS is not just a project; it’s a revolution in the decentralized cloud marketplace. Let’s showcase the power of innovation and make AkashOS the winner at the hackathon! 
-
 # What is this image best used for?
 
-You can use this image to takeover any x86 machine or virtual machine that you want to configure as a provider on the Akash network
+You can use this image to takeover any x86 machine or virtual machine that you want to configure as a provider on the Akash Network.
 
 # Target audience for this ISO - you should be on this list
 
