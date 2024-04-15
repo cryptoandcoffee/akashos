@@ -75,7 +75,7 @@ node_setup() {
       --set akash_node.api_enable=true \
       --set akash_node.minimum_gas_prices=0uakt \
       --set akash_node.snapshot_provider=polkachu \
-      --set state_sync.enabled=true \
+      --set state_sync.enabled=false \
       --set resources.limits.cpu="2" \
       --set resources.limits.memory="8Gi" \
       --set resources.requests.cpu="2" \
