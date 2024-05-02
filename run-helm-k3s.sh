@@ -93,10 +93,6 @@ node_setup() {
       AKASH_PRUNING_KEEP_EVERY=0 \
       AKASH_P2P_PERSISTENT_PEERS="$PERSISTENT_PEERS,$LIVE_PEERS"
 
-      #AKASH_P2P_MAX_NUM_INBOUND_PEERS=100 \
-      #AKASH_P2P_MAX_NUM_OUTBOUND_PEERS=100 \
-      #AKASH_P2P_MAX_DIAL_ATTEMPTS=3 \
-
     kubectl rollout restart statefulset/akash-node-1 -n akash-services
 }
 
