@@ -91,6 +91,8 @@ node_setup() {
       AKASH_PRUNING_INTERVAL=10 \
       AKASH_PRUNING_KEEP_RECENT=100 \
       AKASH_PRUNING_KEEP_EVERY=0 \
+      AKASH_P2P_SEED_MODE=false \
+      AKASH_P2P_PEX=true \
       AKASH_P2P_PERSISTENT_PEERS="$PERSISTENT_PEERS,$LIVE_PEERS"
 
     kubectl rollout restart statefulset/akash-node-1 -n akash-services
