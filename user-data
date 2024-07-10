@@ -67,12 +67,12 @@ autoinstall:
 
       ---------------------------------------------------------------------------------------|
       |
-      |  Welcome to Akash OS Ubuntu 22.04.4 LTS \l
+      |  Welcome to Akash OS Ubuntu 24.04 LTS \l
       |  Default User     : akash
       |  Default Password : akash
       |  Default Hostname : \n
       |  IP Address       : \4
-      |  ISO Version      : v0.6 Alpha
+      |  ISO Version      : v0.7 Alpha
       |  News:            : GPU is now supported with k3s.
       |
       |--------------------------------------------------------------------------------------|
