@@ -305,7 +305,7 @@ curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dear
     sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
     sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 apt-get -o Acquire::ForceIPv4=true update
-apt-get install nvidia-cuda-550
+apt-get install -y nvidia-cuda-550 nvidia-utils-550
 #ubuntu-drivers autoinstall
 apt-get install -y nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime 
 fi
