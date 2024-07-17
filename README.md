@@ -1,6 +1,4 @@
-# AkashOS: Akash Provider OS - Ubuntu Server 22.04 Edition
-## [AkashOS Build ISO](https://github.com/cryptoandcoffee/akashos-builder) : Build your own ISO from scratch
-## [AkashOS Dashboard](https://github.com/cryptoandcoffee/akashos-dashboard) 
+# AkashOS: Akash Provider OS - Ubuntu Server 24.04 Edition
 
 ![image](https://github.com/cryptoandcoffee/akashos/assets/19512127/600c9ac4-a030-4391-99ec-18738a228897)
 
