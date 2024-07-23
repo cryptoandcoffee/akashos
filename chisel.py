@@ -7,7 +7,7 @@ import atexit
 
 # Global settings 🌍
 server_ip, server_port, local_ip, auth = "x.x.x.x", "8000", "localhost", "akash:akash"
-fixed_ports = [80, 443, 1317, 26656, 26657, 8443]
+fixed_ports = [80, 443, 1317, 26656, 26657, 8443, 8444]
 commands = []
 
 # Terminate all subprocesses 🛑
