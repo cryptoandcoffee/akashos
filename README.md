@@ -44,7 +44,7 @@ Human Dependencies: ~30 minutes
 
 Software Dependencies: ~30 minutes 
 
-- Install Akash OS
+- Install [AkashOS](https://github.com/cryptoandcoffee/akashos/releases)
 - Configure Pricing
 
 
