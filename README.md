@@ -119,7 +119,7 @@ Software Dependencies: ~30 minutes
 11. Send at least 5 AKT to the new wallet address to start the provider.
 12. Click Download Kubeconfig and import into Lens. When first using Lens be sure to set the Namespace to : All or you won't see anything.
 
-Todos:
+### Todos:
 -When changing pricing params, delete the configmap akash-provider-bidscripts from akash-services before re-deploy
 -Remove static/dynamic question during initial boot, confusing to user
 -Show nodes in cluster on Dashboard with kubectl get nodes -A -o wide
