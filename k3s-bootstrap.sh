@@ -288,6 +288,7 @@ helm repo update
 helm install cilium cilium/cilium --wait \
    --namespace kube-system \
    --set global.bandwidthManager=true \
+   --set kubeProxyReplacement=true \
    --set operator.replicas=1
 }
 echo "🕸️ Installing cilium"
