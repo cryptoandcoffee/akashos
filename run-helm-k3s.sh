@@ -114,6 +114,8 @@ provider_setup() {
         --set attributes[11].key=capabilities/storage/2/persistent --set attributes[11].value=true \
         --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=beta3 \
         --set attributes[13].key=capabilities/storage/3/persistent --set attributes[13].value=true \
+        --set email=$PROVIDER_EMAIL \
+        --set website=$PROVIDER_WEBSITE \
         --set from=$ACCOUNT_ADDRESS \
         --set key="$(cat /home/akash/key.pem | base64)" \
         --set keysecret="$(echo $KEY_SECRET | base64)" \
