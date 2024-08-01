@@ -265,6 +265,8 @@ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 function chisel_install(){
 curl https://i.jpillora.com/chisel! | bash
+wget https://raw.githubusercontent.com/cryptoandcoffee/akashos/main/chisel.py
+chown akash:akash chisel.py
 }
 echo "Installing Chisel"
 chisel_install &>> /home/akash/logs/installer/chisel.log
