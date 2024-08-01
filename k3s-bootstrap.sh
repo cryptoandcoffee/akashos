@@ -263,6 +263,13 @@ chown -R akash:akash /home/akash/.kube/
 
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
+function chisel_install(){
+curl https://i.jpillora.com/chisel! | bash
+}
+echo "Installing Chisel"
+chisel_install &>> /home/akash/logs/installer/chisel.log
+
+
 function cilium_install(){
 
 #Get Cilium CLI
@@ -273,27 +280,13 @@ chmod +x cilium
 chown akash:akash cilium
 mv cilium /usr/local/bin/
 rm -f cilium-linux-amd64.tar.gz
-
-#cilium install --set kubeProxyReplacement=strict --set bandwidthManager.enabled=true
-
-
+#Cilium Helm Charts
 helm repo add cilium https://helm.cilium.io/
 helm repo update
-
 helm install cilium cilium/cilium --wait \
    --namespace kube-system \
    --set global.bandwidthManager=true \
    --set operator.replicas=1
-
-#helm install cilium cilium/cilium --wait \
-#    --set operator.replicas=1 \
-#    --set global.containerRuntime.integration="containerd" \
-#    --set global.containerRuntime.socketPath="/var/run/k3s/containerd/containerd.sock" \
-#    --set kubeProxyReplacement=strict \
-#    --set global.bandwidthManager=true \
-#    --namespace kube-system
-
-
 }
 echo "🕸️ Installing cilium"
 cilium_install &>> /home/akash/logs/installer/cilium.log
