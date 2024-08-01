@@ -3,270 +3,159 @@
 mkdir -p  /home/akash/logs/installer
 echo "Install logs are available in /home/akash/logs/installer if anything breaks"
 
-function user_input(){
-
-while true; do
-    clear
-    read -p "Is this setup for the first node/machine in the cluster? (y/n, default: y): " choice
-
-    case "$choice" in
-        n|N ) 
-            CLIENT_NODE_=true
-            echo "Client node setup selected."
-            sleep 2
-            break
-            ;;
-        y|Y ) 
-            CLIENT_NODE_=false
-            echo "Initial setup for akash-node1 selected."
-            sleep 2
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for client node or 'n' for initial setup."
-            sleep 2
-            ;;
-    esac
-done
-
-if [[ $CLIENT_NODE_ == true ]]; then
+function user_input() {
+    # First node or client node
     while true; do
         clear
-        read -p "Enter the hostname to use for this additional node (default: akash-node2): " CLIENT_HOSTNAME_
-        
-        if [[ -z $CLIENT_HOSTNAME_ ]]; then
-            CLIENT_HOSTNAME_="akash-node2"
-        fi
-        
-        read -p "Are you sure the hostname is correct? ($CLIENT_HOSTNAME_) (y/n): " choice
-        
-        case "$choice" in
-            y|Y ) 
-                break
-                ;;
-            n|N ) 
-                echo "Please try again."
-                sleep 2
-                ;;
-            * ) 
-                echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-                sleep 2
-                ;;
-        esac
-    done
-fi
-
-if [[ $CLIENT_NODE_ == true ]]; then
-    read -p "Do you want to attempt to automatically join the client node to the server node? (y/n): " choice
-    if [[ "$choice" =~ ^[yY]$ ]]; then
-        while true; do
-            read -p "What is the IP address of akash-node1? : " AKASH_NODE_1_IP
-            
-            read -p "Are you sure the IP address of akash-node1 is correct? (Current: $AKASH_NODE_1_IP) (y/n): " confirm
-            case "$confirm" in
-                [yY] )
-                    while true; do
-                        read -p "Should this node be a control plane or an agent? (c/a): " node_type
-                        case "$node_type" in
-                            [cC] )
-                                NODE_TYPE="control_plane"
-                                break
-                                ;;
-                            [aA] )
-                                NODE_TYPE="agent"
-                                break
-                                ;;
-                            * )
-                                echo "Invalid entry. Please enter 'c' for control plane or 'a' for agent."
-                                sleep 2
-                                ;;
-                        esac
-                    done
+        read -p "Is this setup for the first node/machine in the cluster? (y/n, default: y): " choice
+        read -p "Are you sure? (y/n): " confirm
+        if [[ "$confirm" =~ ^[yY]$ ]]; then
+            case "$choice" in
+                n|N ) 
+                    CLIENT_NODE_=true
+                    echo "Client node setup selected."
                     break
                     ;;
-                [nN] )
-                    echo "Please try again."
-                    sleep 2
+                y|Y|"" ) 
+                    CLIENT_NODE_=false
+                    echo "Initial setup for akash-node1 selected."
+                    break
                     ;;
                 * )
-                    echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-                    sleep 2
+                    echo "Invalid entry. Please enter 'y' for first node or 'n' for client node."
                     ;;
             esac
+        fi
+    done
+
+    # Client node specific questions
+    if [[ $CLIENT_NODE_ == true ]]; then
+        # Hostname
+        while true; do
+            clear
+            read -p "Enter the hostname to use for this additional node (default: akash-node2): " CLIENT_HOSTNAME_
+            CLIENT_HOSTNAME_=${CLIENT_HOSTNAME_:-akash-node2}
+            read -p "Are you sure the hostname is correct? ($CLIENT_HOSTNAME_) (y/n): " confirm
+            if [[ "$confirm" =~ ^[yY]$ ]]; then
+                break
+            fi
         done
-    else
-        echo "Continuing without automatically joining the client node to the server node."
+
+        # Joining server node
+        while true; do
+            read -p "Do you want to attempt to automatically join the client node to the server node? (y/n): " choice
+            read -p "Are you sure? (y/n): " confirm
+            if [[ "$confirm" =~ ^[yY]$ ]]; then
+                if [[ "$choice" =~ ^[yY]$ ]]; then
+                    while true; do
+                        read -p "What is the IP address of akash-node1? : " AKASH_NODE_1_IP
+                        read -p "Are you sure the IP address of akash-node1 is correct? (Current: $AKASH_NODE_1_IP) (y/n): " confirm
+                        if [[ "$confirm" =~ ^[yY]$ ]]; then
+                            while true; do
+                                read -p "Should this node be a control plane or an agent? (c/a): " node_type
+                                read -p "Are you sure? (y/n): " confirm
+                                if [[ "$confirm" =~ ^[yY]$ ]]; then
+                                    case "$node_type" in
+                                        [cC] ) NODE_TYPE="control_plane"; break ;;
+                                        [aA] ) NODE_TYPE="agent"; break ;;
+                                        * ) echo "Invalid entry. Please enter 'c' for control plane or 'a' for agent." ;;
+                                    esac
+                                fi
+                            done
+                            break
+                        fi
+                    done
+                else
+                    echo "Continuing without automatically joining the client node to the server node."
+                fi
+                break
+            fi
+        done
     fi
-fi
 
-if [[ $CLIENT_NODE_ == "false" ]]; then
-  # Check if the user has an Akash wallet
-  while true; do
-    clear
-    read -p "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (y/n, default: n): " choice
+    # First node specific questions
+    if [[ $CLIENT_NODE_ == false ]]; then
+        # Akash wallet
+        while true; do
+            clear
+            read -p "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (y/n, default: n): " choice
+            read -p "Are you sure? (y/n): " confirm
+            if [[ "$confirm" =~ ^[yY]$ ]]; then
+                case "$choice" in
+                    y|Y ) NEW_WALLET_=false; break ;;
+                    n|N|"" ) NEW_WALLET_=true; echo "New wallet required during setup."; break ;;
+                    * ) echo "Invalid entry. Please enter 'y' for yes or 'n' for no." ;;
+                esac
+            fi
+        done
 
-    case "$choice" in
-        y|Y ) 
-            NEW_WALLET_=false
-            break
-            ;;
-        n|N ) 
-            echo "New wallet required during setup."
-            NEW_WALLET_=true
-            sleep 2
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-            sleep 2
-            ;;
-    esac
-  done
+        # Import key if the user has one
+        if [[ $NEW_WALLET_ == false ]]; then
+            while true; do
+                clear
+                read -p "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...): " mnemonic_
+                read -p "Are you sure the wallet mnemonic is correct? ($mnemonic_) (y/n): " confirm
+                if [[ "$confirm" =~ ^[yY]$ ]]; then
+                    break
+                fi
+            done
+        fi
 
-  # Import key if the user knows it
-  if [[ $NEW_WALLET_ == "false" ]]; then
+        # Domain name
+        while true; do
+            clear
+            read -p "Enter the domain name to use for your provider (example.com): " DOMAIN_
+            read -p "Are you sure the provider domain is correct? ($DOMAIN_) (y/n): " confirm
+            if [[ "$confirm" =~ ^[yY]$ ]]; then
+                break
+            fi
+        done
+
+    # Verified provider
     while true; do
-      clear
-      read -p "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...): " mnemonic_
-
-      read -p "Are you sure the wallet mnemonic is correct? ($mnemonic_) (y/n): " choice
-        
-      case "$choice" in
-          y|Y ) 
-              break
-              ;;
-          n|N ) 
-              echo "Please try again."
-              sleep 2
-              ;;
-          * ) 
-              echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-              sleep 2
-              ;;
-      esac
+        clear
+        echo "Becoming a verified provider increase the amount of bids and deployments you will receive"
+        echo "and requires publicly sharing your email and website. This process is documented here:"
+        echo "This information will be visible to all Akash network users."
+        read -p "Do you want to become a verified provider and share this information publicly? (y/n): " choice
+        read -p "Are you sure? (y/n): " confirm
+        if [[ "$confirm" =~ ^[yY]$ ]]; then
+            if [[ "$choice" =~ ^[yY]$ ]]; then
+                read -p "Enter your email address (this will be public): " PROVIDER_EMAIL_
+                read -p "Enter your website URL (this will be public): " PROVIDER_WEBSITE_
+                echo "Please confirm the following details will be shared publicly:"
+                echo "Email: $PROVIDER_EMAIL_"
+                echo "Website: $PROVIDER_WEBSITE_"
+                read -p "Are you sure you want to proceed? (y/n): " final_confirm
+                if [[ "$final_confirm" =~ ^[yY]$ ]]; then
+                    VERIFIED_PROVIDER_=true
+                    break
+                fi
+            else
+                VERIFIED_PROVIDER_=false
+                break
+            fi
+        fi
     done
-  fi
-
-  # End of client node check
 fi
 
-# GPU Support
-if lspci | grep -q NVIDIA; then
-  while true; do
-    clear
-    read -p "NVIDIA GPU Detected: Would you like to enable it on this host? (y/n, default: y): " GPU_
-    
-    read -p "Are you sure you want to enable GPU support? ($GPU_) (y/n): " choice
-    
-    case "$choice" in
-        y|Y ) 
-            GPU_=true
-            break
-            ;;
-        n|N ) 
-            echo "Skipping GPU support."
-            GPU_=false
-            sleep 3
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-            sleep 3
-            ;;
-    esac
-  done
-fi
-
-if [[ $CLIENT_NODE_ == "false" ]]; then
-  # Domain is required
-  while true; do
-    clear
-    read -p "Enter the domain name to use for your provider (example.com): " DOMAIN_
-    
-    read -p "Are you sure the provider domain is correct? ($DOMAIN_) (y/n): " choice
-    
-    case "$choice" in
-        y|Y ) 
-            break
-            ;;
-        n|N ) 
-            echo "Please try again."
-            sleep 2
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'y' for yes or 'n' for no."
-            sleep 2
-            ;;
-    esac
-  done
-
-  # Dynamic or Static Public IP?
-  while true; do
-    clear
-    read -p "Do you have a dynamic DNS address or a static IP address? ($ip_) (dynamic/static): " choice
-    
-    case "$choice" in
-        dynamic|DYNAMIC ) 
-            ip_=dynamic
-            echo "You chose dynamic IP."
-            break
-            ;;
-        static|STATIC ) 
-            ip_=static
-            echo "You chose static IP."
-            break
-            ;;
-        * )
-            echo "Invalid entry. Please enter 'dynamic' or 'static'."
-            sleep 2
-            ;;
-    esac
-  done 
-
-  # End of client_node mode check
-fi
-
-
-
-if [[ $ip_ == "dynamic" ]]; then
-echo "Dynamic IP Detected"
-  echo "You must use a Dynamic DNS / No-IP service."
-    while true
-    do
-    clear
-    read -p "Enter your dynamic DNS url (akash.no-ip.com) : " DYNAMICIP_
-    read -p "Are you sure the dynamic DNS url is correct? : $DYNAMICIP_ (y/n)? " choice
-    case "$choice" in
-      y|Y ) break;;
-      n|N ) echo "Try again" ; sleep 3;;
-      * ) echo "Invalid entry, please try again with Y or N" ; sleep 3;;
-    esac
-    done
-clear
-echo "📝 Creating DNS Records"
-cat <<EOF > ./dns-records.txt
-*.ingress 300 IN CNAME nodes.$DOMAIN_.
-nodes 300 IN CNAME $DYNAMICIP_.
-provider 300 IN CNAME nodes.$DOMAIN_.
-rpc 300 IN CNAME nodes.$DOMAIN_.
-EOF
-else
-clear
-echo "📝 Creating DNS Records"
-cat <<EOF > ./dns-records.txt
-*.ingress 300 IN CNAME nodes.$DOMAIN_.
-nodes 300 IN A X.X.X.X. #IP of this machine and any additional nodes
-nodes 300 IN A X.X.X.X. #IP of any additional nodes
-nodes 300 IN A X.X.X.X. #IP of any additional nodes
-provider 300 IN CNAME nodes.$DOMAIN_.
-rpc 300 IN CNAME nodes.$DOMAIN_.
-EOF
-
-fi
+    # GPU Support
+    if lspci | grep -q NVIDIA; then
+        while true; do
+            clear
+            read -p "NVIDIA GPU Detected: Would you like to enable it on this host? (y/n, default: y): " GPU_
+            GPU_=${GPU_:-y}
+            read -p "Are you sure you want to enable GPU support? ($GPU_) (y/n): " confirm
+            if [[ "$confirm" =~ ^[yY]$ ]]; then
+                GPU_=$(echo "$GPU_" | tr '[:upper:]' '[:lower:]')
+                break
+            fi
+        done
+    fi
 }
+
 echo "Just a few questions..."
-# Never log
-user_input 
+user_input
 
 
 clear
@@ -490,6 +379,9 @@ echo "REGION=$REGION_" >> variables
 echo "CPU=$CPU_" >> variables
 echo "UPLOAD=$UPLOAD_" >> variables
 echo "DOWNLOAD=$DOWNLOAD_" >> variables
+echo "PROVIDER_EMAIL=$PROVIDER_EMAIL_" >> variables
+echo "PROVIDER_WEBSITE=$PROVIDER_WEBSITE_" >> variables
+echo "VERIFIED_PROVIDER=$VERIFIED_PROVIDER_" >> variables
 echo "KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> variables
 echo "CPU_PRICE=" >> variables
 echo "MEMORY_PRICE=" >> variables
