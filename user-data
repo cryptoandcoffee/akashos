@@ -36,6 +36,7 @@ autoinstall:
     - lvm2
     - python3-pip
     - gunicorn
+    - qemu-guest-agent
   late-commands:
     - |
       # Runs after the user logs in anytime
@@ -72,7 +73,7 @@ autoinstall:
       |  Default Password : akash
       |  Default Hostname : \n
       |  IP Address       : \4
-      |  ISO Version      : v0.7 Alpha
+      |  ISO Version      : v0.8 Alpha
       |  News:            : GPU is now supported with k3s.
       |
       |--------------------------------------------------------------------------------------|
