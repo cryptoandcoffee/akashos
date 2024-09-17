@@ -66,7 +66,7 @@ function node_selection() {
 function client_node_questions() {
     if [[ $CLIENT_NODE_ == true ]]; then
         # Set hostname
-        set_variable "Enter the hostname to use for this additional node" "akash-node2" "CLIENT_HOSTNAME_"
+        set_variable "Enter the hostname to use for this additional node:" "akash-node2" "CLIENT_HOSTNAME_"
         #joining_server_node
     fi
 }
