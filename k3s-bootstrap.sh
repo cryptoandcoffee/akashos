@@ -3,159 +3,143 @@
 mkdir -p  /home/akash/logs/installer
 echo "Install logs are available in /home/akash/logs/installer if anything breaks"
 
-function user_input() {
-    # First node or client node
+# Utility function to read user input with a default value
+function read_input() {
+    local prompt="$1"
+    local default="$2"
+    local input
+
+    read -p "$prompt" input
+    echo "${input:-$default}"
+}
+
+# Utility function to confirm user input
+function confirm_input() {
+    local prompt="$1"
+    local input
+
     while true; do
-        clear
-        read -p "Is this setup for the first node/machine in the cluster? (y/n, default: y): " choice
-        read -p "Are you sure? (y/n): " confirm
-        if [[ "$confirm" =~ ^[yY]$ ]]; then
-            case "$choice" in
-                n|N ) 
-                    CLIENT_NODE_=true
-                    echo "Client node setup selected."
-                    break
-                    ;;
-                y|Y|"" ) 
-                    CLIENT_NODE_=false
-                    echo "Initial setup for akash-node1 selected."
-                    break
-                    ;;
-                * )
-                    echo "Invalid entry. Please enter 'y' for first node or 'n' for client node."
-                    ;;
-            esac
+        read -p "$prompt (y/n): " input
+        case "$input" in
+            y|Y) return 0 ;;
+            n|N) return 1 ;;
+            *) echo "Invalid entry. Please enter 'y' or 'n'." ;;
+        esac
+    done
+}
+
+# Utility function to set a variable based on user input and confirmation
+function set_variable() {
+    local prompt="$1"
+    local default="$2"
+    local var_name="$3"
+
+    while true; do
+        local value=$(read_input "$prompt" "$default")
+        if confirm_input "Are you sure the value is correct? ($value)"; then
+            eval "$var_name='$value'"
+            break
         fi
     done
+}
 
-    # Client node specific questions
-    if [[ $CLIENT_NODE_ == true ]]; then
-        # Hostname
-        while true; do
-            clear
-            read -p "Enter the hostname to use for this additional node (default: akash-node2): " CLIENT_HOSTNAME_
-            CLIENT_HOSTNAME_=${CLIENT_HOSTNAME_:-akash-node2}
-            read -p "Are you sure the hostname is correct? ($CLIENT_HOSTNAME_) (y/n): " confirm
-            if [[ "$confirm" =~ ^[yY]$ ]]; then
-                break
-            fi
-        done
-
-        # Joining server node
-        while true; do
-            read -p "Do you want to attempt to automatically join the client node to the server node? (y/n): " choice
-            read -p "Are you sure? (y/n): " confirm
-            if [[ "$confirm" =~ ^[yY]$ ]]; then
-                if [[ "$choice" =~ ^[yY]$ ]]; then
-                    while true; do
-                        read -p "What is the IP address of akash-node1? : " AKASH_NODE_1_IP
-                        read -p "Are you sure the IP address of akash-node1 is correct? (Current: $AKASH_NODE_1_IP) (y/n): " confirm
-                        if [[ "$confirm" =~ ^[yY]$ ]]; then
-                            while true; do
-                                read -p "Should this node be a control plane or an agent? (c/a): " node_type
-                                read -p "Are you sure? (y/n): " confirm
-                                if [[ "$confirm" =~ ^[yY]$ ]]; then
-                                    case "$node_type" in
-                                        [cC] ) NODE_TYPE="control_plane"; break ;;
-                                        [aA] ) NODE_TYPE="agent"; break ;;
-                                        * ) echo "Invalid entry. Please enter 'c' for control plane or 'a' for agent." ;;
-                                    esac
-                                fi
-                            done
-                            break
-                        fi
-                    done
-                else
-                    echo "Continuing without automatically joining the client node to the server node."
-                fi
-                break
-            fi
-        done
+function gpu_check() {
+    if lspci | grep -q NVIDIA; then
+        if confirm_input "NVIDIA GPU Detected: Would you like to enable it on this host? (default: y)"; then
+            GPU_=true
+        else
+            GPU_=false
+        fi
     fi
+}
 
-    # First node specific questions
-    if [[ $CLIENT_NODE_ == false ]]; then
-        # Akash wallet
+function node_selection() {
+    if confirm_input "Is this setup for the first node/machine in the cluster? (default: y)"; then
+        CLIENT_NODE_=false
+        echo "Initial setup for akash-node1 selected."
+    else
+        CLIENT_NODE_=true
+        echo "Client node setup selected."
+    fi
+}
+
+function client_node_questions() {
+    if [[ $CLIENT_NODE_ == true ]]; then
+        # Set hostname
+        set_variable "Enter the hostname to use for this additional node" "akash-node2" "CLIENT_HOSTNAME_"
+        #joining_server_node
+    fi
+}
+
+function joining_server_node() {
+    if confirm_input "Do you want to attempt to automatically join the client node to the server node?"; then
+        # Set IP address of akash-node1
+        set_variable "What is the IP address of akash-node1?" "" "AKASH_NODE_1_IP"
+        
+        # Set node type (control plane or agent)
         while true; do
-            clear
-            read -p "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (y/n, default: n): " choice
-            read -p "Are you sure? (y/n): " confirm
-            if [[ "$confirm" =~ ^[yY]$ ]]; then
-                case "$choice" in
-                    y|Y ) NEW_WALLET_=false; break ;;
-                    n|N|"" ) NEW_WALLET_=true; echo "New wallet required during setup."; break ;;
-                    * ) echo "Invalid entry. Please enter 'y' for yes or 'n' for no." ;;
+            local node_type=$(read_input "Should this node be a control plane or an agent? (c/a)" "")
+            if confirm_input "Are you sure? ($node_type)"; then
+                case "$node_type" in
+                    c|C) NODE_TYPE="control_plane"; break ;;
+                    a|A) NODE_TYPE="agent"; break ;;
+                    *) echo "Invalid entry. Please enter 'c' for control plane or 'a' for agent." ;;
                 esac
             fi
         done
+    else
+        echo "Continuing without automatically joining the client node to the server node."
+    fi
+}
+
+function first_node_questions() {
+    if [[ $CLIENT_NODE_ == false ]]; then
+        # Akash wallet
+        if confirm_input "Do you have an Akash wallet with at least 50 AKT and the mnemonic phrase available? (default: n)"; then
+            NEW_WALLET_=false
+        else
+            NEW_WALLET_=true
+            echo "New wallet required during setup."
+        fi
 
         # Import key if the user has one
         if [[ $NEW_WALLET_ == false ]]; then
-            while true; do
-                clear
-                read -p "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...): " mnemonic_
-                read -p "Are you sure the wallet mnemonic is correct? ($mnemonic_) (y/n): " confirm
-                if [[ "$confirm" =~ ^[yY]$ ]]; then
-                    break
-                fi
-            done
+            set_variable "Enter the mnemonic phrase to import your provider wallet (e.g., KING SKI GOAT...)" "" "mnemonic_"
         fi
 
-        # Domain name
-        while true; do
-            clear
-            read -p "Enter the domain name to use for your provider (example.com): " DOMAIN_
-            read -p "Are you sure the provider domain is correct? ($DOMAIN_) (y/n): " confirm
-            if [[ "$confirm" =~ ^[yY]$ ]]; then
-                break
-            fi
-        done
+        # Set domain name
+        set_variable "Enter the domain name to use for your provider" "example.com" "DOMAIN_"
 
-    # Verified provider
-    while true; do
-        clear
-        echo "Becoming a verified provider increase the amount of bids and deployments you will receive"
-        echo "and requires publicly sharing your email and website. This process is documented here:"
-        echo "This information will be visible to all Akash network users."
-        read -p "Do you want to become a verified provider and share this information publicly? (y/n): " choice
-        read -p "Are you sure? (y/n): " confirm
-        if [[ "$confirm" =~ ^[yY]$ ]]; then
-            if [[ "$choice" =~ ^[yY]$ ]]; then
-                read -p "Enter your email address (this will be public): " PROVIDER_EMAIL_
-                read -p "Enter your website URL (this will be public): " PROVIDER_WEBSITE_
-                echo "Please confirm the following details will be shared publicly:"
-                echo "Email: $PROVIDER_EMAIL_"
-                echo "Website: $PROVIDER_WEBSITE_"
-                read -p "Are you sure you want to proceed? (y/n): " final_confirm
-                if [[ "$final_confirm" =~ ^[yY]$ ]]; then
-                    VERIFIED_PROVIDER_=true
-                    break
-                fi
+        # Verified provider
+        if confirm_input "Do you want to become a verified provider and share this information publicly?"; then
+            set_variable "Enter your email address (this will be public)" "" "PROVIDER_EMAIL_"
+            set_variable "Enter your website URL (this will be public)" "" "PROVIDER_WEBSITE_"
+
+            echo "Please confirm the following details will be shared publicly:"
+            echo "Email: $PROVIDER_EMAIL_"
+            echo "Website: $PROVIDER_WEBSITE_"
+            if confirm_input "Are you sure you want to proceed?"; then
+                VERIFIED_PROVIDER_=true
             else
                 VERIFIED_PROVIDER_=false
-                break
             fi
+        else
+            VERIFIED_PROVIDER_=false
         fi
-    done
-fi
-
-    # GPU Support
-    if lspci | grep -q NVIDIA; then
-        while true; do
-            clear
-            read -p "NVIDIA GPU Detected: Would you like to enable it on this host? (y/n, default: y): " GPU_
-            GPU_=${GPU_:-y}
-            read -p "Are you sure you want to enable GPU support? ($GPU_) (y/n): " confirm
-            if [[ "$confirm" =~ ^[yY]$ ]]; then
-                GPU_=$(echo "$GPU_" | tr '[:upper:]' '[:lower:]')
-                break
-            fi
-        done
     fi
+}
+
+function user_input() {
+    # Toggle the following functions as needed by commenting/uncommenting them
+    node_selection
+    gpu_check
+    client_node_questions
+    first_node_questions
 }
 
 echo "Just a few questions..."
 user_input
+
 
 
 clear
@@ -172,7 +156,6 @@ function depends(){
 export DEBIAN_FRONTEND=noninteractive
 apt-get -o Acquire::ForceIPv4=true update
 DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yqq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-
 snap install kubectl --classic ; snap install helm --classic
 #Disable sleep
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
@@ -191,12 +174,11 @@ if lspci | grep -q NVIDIA; then
 echo "Install NVIDIA"
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
   && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+  sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+  tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 apt-get -o Acquire::ForceIPv4=true update
-apt-get install -y nvidia-driver-550 nvidia-utils-550
-#ubuntu-drivers autoinstall
-apt-get install -y nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime 
+/bin/bash -c "$(curl -sL https://git.io/vokNn)"
+apt-fast install -y nvidia-driver-550 nvidia-utils-550 nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime
 fi
 }
 
