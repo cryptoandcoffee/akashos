@@ -155,7 +155,8 @@ KEY_SECRET_=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
 function depends(){
 export DEBIAN_FRONTEND=noninteractive
 apt-get -o Acquire::ForceIPv4=true update
-DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yqq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+/bin/bash -c "$(curl -sL https://git.io/vokNn)"
+DEBIAN_FRONTEND=noninteractive apt-fast dist-upgrade -yqq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 snap install kubectl --classic ; snap install helm --classic
 #Disable sleep
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
@@ -177,8 +178,8 @@ curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dear
   sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
   tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 apt-get -o Acquire::ForceIPv4=true update
-/bin/bash -c "$(curl -sL https://git.io/vokNn)"
-apt-fast install -y nvidia-driver-550 nvidia-utils-550 nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime
+apt-fast install -y nvidia-driver-550 nvidia-utils-550 
+apt-fast install -y nvidia-cuda-toolkit nvidia-container-toolkit nvidia-container-runtime
 fi
 }
 
