@@ -122,15 +122,19 @@ provider_setup() {
         --set domain=$DOMAIN \
         --set bidpricescript="$(cat /home/akash/bid-engine-script.sh | openssl base64 -A)" \
         --set ipoperator=false \
-        --set node=$NODE \
         --set log_restart_patterns="rpc node is not catching up|bid failed" \
         --set resources.limits.cpu="2" \
         --set resources.limits.memory="2Gi" \
         --set resources.requests.cpu="1" \
-        --set resources.requests.memory="1Gi"
-
-    # Provider customizations
-    kubectl set env statefulset/akash-provider AKASH_GAS_PRICES=0.025uakt AKASH_GAS_ADJUSTMENT=1.75 AKASH_GAS=auto AKASH_BROADCAST_MODE=block AKASH_TX_BROADCAST_TIMEOUT=15m0s AKASH_BID_TIMEOUT=15m0s AKASH_LEASE_FUNDS_MONITOR_INTERVAL=90s AKASH_WITHDRAWAL_PERIOD=24h -n akash-services
+        --set resources.requests.memory="1Gi" \
+        --set gasprices="0.025uakt" \
+        --set gasadjustment="1.75" \
+        --set gas="auto" \
+        --set tx_broadcast_timeout="15m0s" \
+        --set bid_timeout="15m0s" \
+        --set lease_funds_monitor_interval="90s" \
+        --set withdrawalperiod="24h" \
+        --set node="https://rpc.akashedge.com:443"
 
     kubectl patch configmap akash-provider-scripts \
       --namespace akash-services \
