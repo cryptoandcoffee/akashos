@@ -84,7 +84,7 @@ node_setup() {
     #Get from Cosmos Chain Registry
     PERSISTENT_PEERS=$(curl -s https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/chain.json | jq -r '.peers.seeds[] | "\(.id)@\(.address)"' | paste -sd,)
     #Get from Running Node
-    LIVE_PEERS=$(curl -s https://akash-rpc.polkachu.com/net_info | jq -r '.result.peers[] | "\(.node_info.id)@\(.node_info.listen_addr)"' | grep -v "tcp" | paste -sd,)
+    LIVE_PEERS=$(curl -s https://rpc.akashedge.com/net_info | jq -r '.result.peers[] | "\(.node_info.id)@\(.node_info.listen_addr)"' | grep -v "tcp" | paste -sd,)
 
     kubectl set env statefulset/akash-node-1 -n akash-services \
       AKASH_PRUNING=custom \
