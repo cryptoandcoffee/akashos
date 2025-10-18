@@ -108,12 +108,12 @@ function first_node_questions() {
         fi
 
         # Set domain name
-        set_variable "Enter the domain name to use for your provider" "example.com" "DOMAIN_"
+        set_variable "Enter the domain name to use for your provider: " "example.com" "DOMAIN_"
 
         # Verified provider
         if confirm_input "Do you want to become a verified provider and share this information publicly?"; then
-            set_variable "Enter your email address (this will be public)" "" "PROVIDER_EMAIL_"
-            set_variable "Enter your website URL (this will be public)" "" "PROVIDER_WEBSITE_"
+            set_variable "Enter your email address (this will be public): " "" "PROVIDER_EMAIL_"
+            set_variable "Enter your website URL (this will be public): " "" "PROVIDER_WEBSITE_"
 
             echo "Please confirm the following details will be shared publicly:"
             echo "Email: $PROVIDER_EMAIL_"
