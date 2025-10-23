@@ -134,6 +134,8 @@ provider_setup() {
         --set bid_timeout="15m0s" \
         --set lease_funds_monitor_interval="90s" \
         --set withdrawalperiod="24h" \
+        --set letsEncrypt.enabled=false \
+        --set storage.home.storageClass="local-path" \
         --set node="https://rpc.akashedge.com:443"
 
     kubectl patch configmap akash-provider-scripts \
