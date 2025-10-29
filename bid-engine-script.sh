@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Fetch AKT to USD rate
+fetch_akt_to_usd() {
 usd_per_akt=$(curl -s "https://akashedge.com/price" | jq -r '.price')
 if [ -z "$usd_per_akt" ] || [ "$usd_per_akt" == "0" ]; then
     exit 1
 fi
-
+}
 
 # Function to calculate total resource costs in USD
 calculate_total_cost_usd() {
