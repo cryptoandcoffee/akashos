@@ -1,20 +1,11 @@
 #!/bin/bash
 
-# Function to fetch the AKT to USD exchange rate
-fetch_akt_to_usd() {
-    for url in "https://api-osmosis.imperator.co/tokens/v2/price/AKT" \
-        "https://api.kraken.com/0/public/Ticker?pair=AKTUSD" \
-        "https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=AKT-USDT"; do
-        usd_per_akt=$(curl -s "$url" | jq -r '.data.price // .price // .result.AKTUSD.a[0]')
-        if [[ -n $usd_per_akt && $usd_per_akt != "0" ]]; then
-            break
-        fi
-    done
+# Fetch AKT to USD rate
+usd_per_akt=$(curl -s "https://akashedge.com/price" | jq -r '.price')
+if [ -z "$usd_per_akt" ] || [ "$usd_per_akt" == "0" ]; then
+    exit 1
+fi
 
-    if [[ -z $usd_per_akt || $usd_per_akt == "0" ]]; then
-        exit 1
-    fi
-}
 
 # Function to calculate total resource costs in USD
 calculate_total_cost_usd() {
