@@ -112,7 +112,7 @@ provider_setup() {
         --set attributes[9].key=capabilities/storage/1/persistent --set attributes[9].value=true \
         --set attributes[10].key=capabilities/storage/2/class --set attributes[10].value=beta2 \
         --set attributes[11].key=capabilities/storage/2/persistent --set attributes[11].value=true \
-        --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=beta3 \
+        --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=local-path \
         --set attributes[13].key=capabilities/storage/3/persistent --set attributes[13].value=true \
         --set email=$PROVIDER_EMAIL \
         --set website=$PROVIDER_WEBSITE \
@@ -134,11 +134,9 @@ provider_setup() {
         --set bid_timeout="15m0s" \
         --set lease_funds_monitor_interval="90s" \
         --set withdrawalperiod="24h" \
-        --set letsEncrypt.enabled=false \
-        --set storage.home.storageClass="local-path" \
         --set node="https://rpc.akashedge.com:443"
 
-    kubectl patch configmap akash-provider-scripts \
+    kubectl patch configmap akash-provider-script \
       --namespace akash-services \
       --type json \
       --patch='[{"op": "add", "path": "/data/liveness_checks.sh", "value":"#!/bin/bash\necho \"Liveness check bypassed\""}]'
