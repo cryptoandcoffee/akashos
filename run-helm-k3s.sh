@@ -109,11 +109,11 @@ provider_setup() {
         --set attributes[6].key=network_upload --set attributes[6].value=$UPLOAD \
         --set attributes[7].key=status --set attributes[7].value=https://status.$DOMAIN \
         --set attributes[8].key=capabilities/storage/1/class --set attributes[8].value=beta1 \
-        --set attributes[9].key=capabilities/storage/1/persistent --set attributes[9].value=true \
+        --set attributes[9].key=capabilities/storage/1/persistent --set attributes[9].value=false \
         --set attributes[10].key=capabilities/storage/2/class --set attributes[10].value=beta2 \
-        --set attributes[11].key=capabilities/storage/2/persistent --set attributes[11].value=true \
-        --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=local-path \
-        --set attributes[13].key=capabilities/storage/3/persistent --set attributes[13].value=true \
+        --set attributes[11].key=capabilities/storage/2/persistent --set attributes[11].value=false \
+        --set attributes[12].key=capabilities/storage/3/class --set attributes[12].value=beta3 \
+        --set attributes[13].key=capabilities/storage/3/persistent --set attributes[13].value=false \
         --set email=$PROVIDER_EMAIL \
         --set website=$PROVIDER_WEBSITE \
         --set from=$ACCOUNT_ADDRESS \
@@ -134,6 +134,8 @@ provider_setup() {
         --set bid_timeout="15m0s" \
         --set lease_funds_monitor_interval="90s" \
         --set withdrawalperiod="24h" \
+        --set letsEncrypt.enabled=false \
+        --set storage.home.storageClassName="local-path" \
         --set node="https://rpc.akashedge.com:443"
 
     kubectl patch configmap akash-provider-script \
