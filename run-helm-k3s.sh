@@ -71,31 +71,25 @@ kubectl label ingressclass akash-ingress-class akash.network=true
 }
 
 node_setup() {
-    helm upgrade --install akash-node akash/akash-node -n akash-services \
-      --set akash_node.api_enable=true \
-      --set akash_node.minimum_gas_prices=0uakt \
-      --set akash_node.snapshot_provider=polkachu \
-      --set state_sync.enabled=false \
-      --set resources.limits.cpu="2" \
-      --set resources.limits.memory="8Gi" \
-      --set resources.requests.cpu="2" \
-      --set resources.requests.memory="4Gi"
-
-    #Get from Cosmos Chain Registry
-    PERSISTENT_PEERS=$(curl -s https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/chain.json | jq -r '.peers.seeds[] | "\(.id)@\(.address)"' | paste -sd,)
-    #Get from Running Node
-    LIVE_PEERS=$(curl -s https://rpc.akashedge.com/net_info | jq -r '.result.peers[] | "\(.node_info.id)@\(.node_info.listen_addr)"' | grep -v "tcp" | paste -sd,)
-
-    kubectl set env statefulset/akash-node-1 -n akash-services \
-      AKASH_PRUNING=custom \
-      AKASH_PRUNING_INTERVAL=10 \
-      AKASH_PRUNING_KEEP_RECENT=100 \
-      AKASH_PRUNING_KEEP_EVERY=0 \
-      AKASH_P2P_SEED_MODE=false \
-      AKASH_P2P_PEX=true \
-      AKASH_P2P_PERSISTENT_PEERS="$PERSISTENT_PEERS,$LIVE_PEERS"
-
-    kubectl rollout restart statefulset/akash-node-1 -n akash-services
+helm upgrade --install akash-node akash/akash-node -n akash-services \
+  --set akash_node.api_enable=true \
+  --set akash_node.minimum_gas_prices=0uakt \
+  --set akash_node.snapshot_provider=polkachu \
+  --set akash_node.peers=$(curl -s https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/chain.json | jq -r '.peers.seeds[] | "\(.id)@\(.address)"' | grep -v "@$" | paste -sd, | sed 's/,$//' | sed 's/,/\\,/g') \
+  --set akash_node.env.AKASH_PRUNING=custom \
+  --set akash_node.env.AKASH_PRUNING_INTERVAL=10 \
+  --set akash_node.env.AKASH_PRUNING_KEEP_RECENT=100 \
+  --set akash_node.env.AKASH_PRUNING_KEEP_EVERY=0 \
+  --set akash_node.env.AKASH_P2P_SEED_MODE=true \
+  --set akash_node.env.AKASH_P2P_PEX=true \
+  --set akash_node.env.AKASH_P2P_PERSISTENT_PEERS=$(curl -s https://rpc.akashedge.com/net_info | jq -r '.result.peers[] | "\(.node_info.id)@\(.node_info.listen_addr)"' | grep -v "tcp://" | grep -v "@$" | paste -sd, | sed 's/,$//' | sed 's/,/\\,/g') \
+  --set state_sync.enabled=false \
+  --set state_sync.rpc1="https://akash-rpc.polkachu.com:443" \
+  --set state_sync.rpc2="https://akash-rpc.polkachu.com:443" \
+  --set resources.limits.cpu="2" \
+  --set resources.limits.memory="8Gi" \
+  --set resources.requests.cpu="2" \
+  --set resources.requests.memory="4Gi"
 }
 
 provider_setup() {
