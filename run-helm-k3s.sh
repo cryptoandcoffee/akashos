@@ -8,6 +8,7 @@ helm repo add akash https://akash-network.github.io/helm-charts
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add rook-release https://charts.rook.io/release
 helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo add keel https://charts.keel.sh
 
 helm repo update
 
@@ -305,11 +306,36 @@ kubectl label sc beta1 akash.network=true
 
 echo "Did you update this label to the same node in rook-ceph-cluster.values1.yml?"
 kubectl label node $PERSISTENT_STORAGE_NODE1 akash.network/storageclasses=${PERSISTENT_STORAGE_NODE1_CLASS} --overwrite
-kubectl label node $PERSISTENT_STORAGE_NODE2 akash.network/storageclasses=${PERSISTENT_STORAGE_NODE3_CLASS} --overwrite
+kubectl label node $PERSISTENT_STORAGE_NODE2 akash.network/storageclasses=${PERSISTENT_STORAGE_NODE2_CLASS} --overwrite
 kubectl label node $PERSISTENT_STORAGE_NODE3 akash.network/storageclasses=${PERSISTENT_STORAGE_NODE3_CLASS} --overwrite
 
 echo "If health not OK, do this"
 kubectl -n rook-ceph exec -it $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- bash -c "ceph health mute POOL_NO_REDUNDANCY"
+}
+
+keel_setup() {
+    helm upgrade --install keel keel/keel \
+        --namespace keel \
+        --create-namespace \
+        --set resources.limits.cpu="1" \
+        --set resources.limits.memory="1Gi" \
+        --set resources.requests.cpu="50m" \
+        --set resources.requests.memory="64Mi"
+
+    STATEFULSETS=("akash-node-1" "akash-provider")
+
+    for sts in "${STATEFULSETS[@]}"; do
+        if kubectl get statefulset "$sts" -n akash-services &>/dev/null; then
+            kubectl annotate statefulset "$sts" \
+                keel.sh/policy=minor \
+                keel.sh/trigger=poll \
+                keel.sh/pollSchedule="@every 15m" \
+                -n akash-services
+            echo "Annotated $sts"
+        else
+            echo "StatefulSet $sts not found, skipping annotation"
+        fi
+    done
 }
 
 run_functions() {
@@ -325,7 +351,7 @@ run_functions() {
 }
 
 if [ "$#" -eq 0 ]; then
-    run_functions setup_environment ingress_charts node_setup provider_setup hostname_operator inventory_operator
+    run_functions setup_environment ingress_charts node_setup provider_setup hostname_operator inventory_operator keel_setup
 else
     run_functions "$@"
 fi
